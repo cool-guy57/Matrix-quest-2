@@ -254,6 +254,14 @@ const MOVES = {
     "Data Drain":    { name: "Data Drain", type: "Bio", power: 60, drains: true }
 };
 
+const TYPE_CHART = {
+    Primal: { Primal: 1, Plasma: 1, Cyber: 1, Bio: 1, Mecha: 1 },
+    Plasma: { Primal: 1, Plasma: 0.9, Cyber: 1.2, Bio: 1, Mecha: 1.1 },
+    Cyber:  { Primal: 1.1, Plasma: 1.1, Cyber: 0.9, Bio: 1.1, Mecha: 1 },
+    Bio:    { Primal: 1.1, Plasma: 0.9, Cyber: 1.1, Bio: 0.95, Mecha: 1.2 },
+    Mecha:  { Primal: 1.1, Plasma: 1, Cyber: 1.2, Bio: 1.1, Mecha: 0.95 }
+};
+
 const CORE_INDEX = {
     "Nitrofox":    { name: "NITROFOX.EXE", symbol: "🦊", color: "#ff00ff", types: ["Plasma", "Cyber"], baseHp: 45, baseAtk: 62, baseDef: 35, baseSpd: 98, moves: ["Strike", "Nitro Burn"] },
     "Codevitru":   { name: "CODEVITRU.SYS", symbol: "🤖", color: "#00ffff", types: ["Cyber", "Mecha"], baseHp: 55, baseAtk: 48, baseDef: 65, baseSpd: 40, moves: ["Strike", "Overclock.exe"] },
@@ -529,9 +537,16 @@ const GameEngine = {
     },
 
     calculateDamage(att, def, move) {
+        if (!att || !def || !move || !move.power) return 0;
+
         let mod = 1;
-        def.types.forEach(t => { if (TYPE_CHART[move.type] && TYPE_CHART[move.type][t] !== undefined) mod *= TYPE_CHART[move.type][t]; });
-        return Math.floor((((2 * att.level / 5 + 2) * move.power * (att.atk / def.def)) / 50) + 2) * mod;
+        const typeChart = TYPE_CHART[move.type] || {};
+        def.types.forEach(t => {
+            if (typeChart[t] !== undefined) mod *= typeChart[t];
+        });
+
+        const rawDamage = Math.floor((((2 * att.level / 5 + 2) * move.power * (att.atk / def.def)) / 50) + 2) * mod;
+        return Math.max(0, Math.floor(rawDamage));
     }
 };
 
