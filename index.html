@@ -363,6 +363,9 @@ const GameEngine = {
         this.controls.innerHTML = "";
         this.write("⚡ CONNECTION LIVE: Use WASD / Arrow Keys to drive your node frame down the sector pipeline. Step into pink data matrices [░] to scan for roaming rogue daemons.");
         this.createButton("📋 Review Core Configuration Stack", () => this.openPartyMenu());
+        
+        // FOCUS PATCH: Instantly capture browser window event tracking back onto the active document frame
+        window.focus();
     },
 
     executeMoveStep(x, y) {
