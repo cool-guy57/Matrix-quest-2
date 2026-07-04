@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Matrix Quest II: The Outback Ledger</title>
+    <style>
+        body {
+            background-color: #0c0e17;
+            color: #bc00dd;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        #game-container {
+            width: 512px;
+            box-shadow: 0 0 40px rgba(188, 0, 221, 0.4);
+            border: 6px solid #2b1c3f;
+            background: #020205;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header-display {
+            background: #090a12;
+            border-bottom: 4px solid #2b1c3f;
+            padding: 12px;
+            color: #fff;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #screen-viewport {
+            width: 512px;
+            height: 256px;
+            position: relative;
+            background: #05020a;
+            border-bottom: 4px solid #2b1c3f;
+            overflow: hidden;
+        }
+
+        #map-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 32px);
+            grid-template-rows: repeat(8, 32px);
+            width: 512px;
+            height: 256px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .tile {
+            width: 32px;
+            height: 32px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .tile-floor { background-color: #090514; }
+        
+        .tile-grass { 
+            background-color: rgba(188, 0, 221, 0.15); 
+            border: 1px dashed rgba(188, 0, 221, 0.3);
+            color: #bc00dd;
+        }
+
+        .tile-wall { 
+            background-color: #2b1c3f; 
+            border: 1px solid #bc00dd;
+        }
+
+        .tile-terminal {
+            background-color: rgba(0, 255, 204, 0.2);
+            border: 2px solid #00ffcc;
+            color: #00ffcc;
+            font-weight: bold;
+            animation: terminalGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes terminalGlow {
+            0% { box-shadow: inset 0 0 5px #00ffcc; }
+            100% { box-shadow: inset 0 0 15px #00ffcc; }
+        }
+
+        #player-node {
+            width: 32px;
+            height: 32px;
+            position: absolute;
+            background: #fff;
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 12px #00ffcc;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #020205;
+            font-size: 14px;
+            transition: left 0.1s ease, top 0.1s ease;
+            z-index: 5;
+        }
+
+        #combat-interface {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #05020a 0%, #120720 100%);
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-sizing: border-box;
+        }
+
+        .visual-hud {
+            background: rgba(4, 4, 7, 0.9);
+            border: 2px solid #bc00dd;
+            padding: 6px 10px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 10px;
+            width: 140px;
+        }
+
+        .hud-name { font-weight: bold; color: #00ffcc; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bar-container { width: 100%; background: #1b1f35; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 3px; }
+        .hp-bar { height: 100%; background: #bc00dd; width: 100%; transition: width 0.3s ease; }
+
+        .combat-avatar {
+            font-size: 32px;
+            animation: float 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); filter: brightness(1); }
+            100% { transform: translateY(-6px); filter: brightness(1.2); }
+        }
+
+        #display-window {
+            height: 100px;
+            padding: 12px;
+            box-sizing: border-box;
+            color: #a9b1d6;
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-y: auto;
+            white-space: pre-line;
+            border-bottom: 4px solid #2b1c3f;
+            background: #020205;
+        }
+
+        #ui-controls {
+            background: #040407;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            min-height: 90px;
+        }
+
+        .btn {
+            background: #161224;
+            color: #bc00dd;
+            border: 3px solid #bc00dd;
+            padding: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 1px;
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        .btn:hover {
+            background: #2b1c3f;
+            color: #00ffcc;
+            border-color: #00ffcc;
+        }
+
+        .btn-disabled { background: #0a0a0f !important; color: #444 !important; border-color: #333 !important; cursor: not-allowed !important; box-shadow: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="header-display">
+        <span id="loc-tag">DECK SECURE: INITIALIZING</span>
+        <span id="shard-tag">FRAGMENTS: 75F</span>
+    </div>
+
+    <div id="screen-viewport">
+        <div id="map-grid"></div>
+        <div id="player-node" style="display: none;">P</div>
+
+        <div id="combat-interface">
+            <div class="visual-hud">
+                <div id="ally-name" class="hud-name">---</div>
+                <div>INTEGRITY: <span id="ally-hp-txt">0/0</span></div>
+                <div class="bar-container"><div id="ally-hp-bar" class="hp-bar"></div></div>
+            </div>
+            <div id="ally-avatar" class="combat-avatar">🦊</div>
+            
+            <div style="font-size: 16px; font-weight: bold; color: #ff0055;">VS</div>
+            
+            <div id="enemy-avatar" class="combat-avatar">🐊</div>
+            <div class="visual-hud">
+                <div id="enemy-name" class="hud-name">---</div>
+                <div>INTEGRITY: <span id="enemy-hp-txt">0/0</span></div>
+                <div class="bar-container"><div id="enemy-hp-bar" class="hp-bar"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="display-window">Mounting Matrix Quest II Operational Command Stack...</div>
+    <div id="ui-controls"></div>
+</div>
+
+<script>
+const MAP_LAYOUT = [
+    [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+    [2,0,0,0,0,0,1,1,1,1,0,0,0,0,5,2],
+    [2,0,0,0,0,0,1,1,1,1,0,0,0,0,0,2],
+    [2,0,0,2,2,0,0,0,0,0,0,2,2,0,0,2],
+    [2,0,0,2,2,0,0,0,0,0,0,2,2,0,0,2],
+    [2,1,1,1,1,0,0,0,0,0,0,1,1,1,1,2],
+    [2,1,1,1,1,0,0,0,0,0,0,1,1,1,1,2],
+    [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+];
+
+const MOVES = {
+    "Strike":        { name: "Strike", type: "Primal", power: 35 },
+    "Nitro Burn":    { name: "Nitro Burn", type: "Plasma", power: 70 },
+    "Overclock.exe": { name: "Overclock.exe", type: "Cyber", power: 50 },
+    "Matrix Cleave": { name: "Matrix Cleave", type: "Cyber", power: 80 },
+    "Bio-Siphon":    { name: "Bio-Siphon", type: "Bio", power: 65, drains: true },
+    "Hydraulic Crush":{ name: "Hydraulic Crush", type: "Mecha", power: 75 },
+    "Prism Beam":    { name: "Prism Beam", type: "Plasma", power: 65 },
+    "Voltage Kick":  { name: "Voltage Kick", type: "Plasma", power: 70 },
+    "Trojan Injection":{ name: "Trojan Injection", type: "Cyber", power: 60, drains: true },
+    "Spore Injection":{ name: "Spore Injection", type: "Bio", power: 40 },
+    "Logic Spike":   { name: "Logic Spike", type: "Cyber", power: 40 },
+    "Acid Bite":     { name: "Acid Bite", type: "Bio", power: 55 },
+    "Data Drain":    { name: "Data Drain", type: "Bio", power: 60, drains: true }
+};
+
+const CORE_INDEX = {
+    "Nitrofox":    { name: "NITROFOX.EXE", symbol: "🦊", color: "#ff00ff", types: ["Plasma", "Cyber"], baseHp: 45, baseAtk: 62, baseDef: 35, baseSpd: 98, moves: ["Strike", "Nitro Burn"] },
+    "Codevitru":   { name: "CODEVITRU.SYS", symbol: "🤖", color: "#00ffff", types: ["Cyber", "Mecha"], baseHp: 55, baseAtk: 48, baseDef: 65, baseSpd: 40, moves: ["Strike", "Overclock.exe"] },
+    "Mechasprout": { name: "MECHASPROUT.BAT", symbol: "🌱", color: "#7cfc00", types: ["Bio", "Mecha"], baseHp: 52, baseAtk: 55, baseDef: 50, baseSpd: 55, moves: ["Strike", "Bio-Siphon"] },
+    
+    "Rustscale":   { name: "RUSTSCALE.THI", symbol: "🐊", color: "#b87333", types: ["Mecha", "Bio"], baseHp: 70, baseAtk: 60, baseDef: 65, baseSpd: 35, moves: ["Strike", "Hydraulic Crush"] },
+    "Shardhawk":   { name: "SHARDHAWK.LOG", symbol: "🦅", color: "#da70d6", types: ["Plasma", "Cyber"], baseHp: 50, baseAtk: 65, baseDef: 40, baseSpd: 95, moves: ["Strike", "Prism Beam"] },
+    "Overhop":     { name: "OVERHOP.PRT", symbol: "🦘", color: "#ff4500", types: ["Plasma", "Bio"], baseHp: 55, baseAtk: 70, baseDef: 45, baseSpd: 85, moves: ["Strike", "Voltage Kick"] },
+    "Scraptinger": { name: "SCRAPTINGER.VRS", symbol: "🦂", color: "#d2691e", types: ["Cyber", "Mecha"], baseHp: 45, baseAtk: 58, baseDef: 50, baseSpd: 75, moves: ["Strike", "Trojan Injection"] },
+    
+    "Rootclash":   { name: "[VET] ROOTCLASH", symbol: "⬢", color: "#39ff14", types: ["Bio"], baseHp: 50, baseAtk: 52, baseDef: 55, baseSpd: 38, moves: ["Strike", "Spore Injection", "Acid Bite", "Data Drain"] },
+    "Voltsnap":    { name: "[VET] VOLTSNAP", symbol: "⚡", color: "#ff007f", types: ["Plasma"], baseHp: 42, baseAtk: 58, baseDef: 38, baseSpd: 95, moves: ["Strike", "Nitro Burn", "Logic Spike", "Voltage Kick"] },
+    "Chiptoad":    { name: "[VET] CHIPTOAD", symbol: "🐸", color: "#228b22", types: ["Bio"], baseHp: 65, baseAtk: 45, baseDef: 60, baseSpd: 30, moves: ["Strike", "Spore Injection", "Data Drain", "Acid Bite"] }
+};
+
+class Monster {
+    constructor(speciesName, level = 5) {
+        const data = CORE_INDEX[speciesName];
+        this.species = speciesName; this.name = data.name; this.types = data.types; this.level = level; this.moves = [...data.moves];
+        this.maxHp = Math.floor((data.baseHp * 2 * level) / 100) + level + 10; this.hp = this.maxHp;
+        this.atk = Math.floor((data.baseAtk * 2 * level) / 100) + 5; this.def = Math.floor((data.baseDef * 2 * level) / 100) + 5; this.spd = Math.floor((data.baseSpd * 2 * level) / 100) + 5;
+    }
+}
+
+const GameEngine = {
+    gridContainer: document.getElementById("map-grid"),
+    playerEl: document.getElementById("player-node"),
+    combatEl: document.getElementById("combat-interface"),
+    display: document.getElementById("display-window"),
+    controls: document.getElementById("ui-controls"),
+    locTag: document.getElementById("loc-tag"),
+    shardTag: document.getElementById("shard-tag"),
+
+    gameState: "STARTER_SELECT", playerGridX: 2, playerGridY: 2,
+    playerParty: [], activeMon: null, enemyMon: null, shards: 75,
+    inventory: { "Link Card": 5, "Nano-Repair": 3 }, battleSubState: "MAIN",
+
+    init() {
+        this.buildDomGridMap();
+        this.drawStarterSelect();
+        
+        window.addEventListener("keydown", e => {
+            if (this.gameState !== "OVERWORLD") return;
+            let targetX = this.playerGridX; let targetY = this.playerGridY;
+            
+            if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") targetY--;
+            else if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") targetY++;
+            else if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") targetX--;
+            else if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") targetX++;
+            else return;
+
+            e.preventDefault();
+            this.executeMoveStep(targetX, targetY);
+        });
+    },
+
+    buildDomGridMap() {
+        this.gridContainer.innerHTML = "";
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 16; c++) {
+                const tile = document.createElement("div");
+                tile.className = "tile";
+                if (MAP_LAYOUT[r][c] === 2) tile.classList.add("tile-wall");
+                else if (MAP_LAYOUT[r][c] === 1) { tile.classList.add("tile-grass"); tile.innerText = "░"; }
+                else if (MAP_LAYOUT[r][c] === 5) { tile.classList.add("tile-terminal"); tile.innerText = "⎋"; }
+                else tile.classList.add("tile-floor");
+                this.gridContainer.appendChild(tile);
+            }
+        }
+    },
+
+    updatePlayerTokenPosition() {
+        this.playerEl.style.left = `${this.playerGridX * 32}px`;
+        this.playerEl.style.top = `${this.playerGridY * 32}px`;
+    },
+
+    write(text) { this.display.innerText = text; this.display.scrollTop = this.display.scrollHeight; },
+
+    createButton(label, callback) {
+        const btn = document.createElement("div"); btn.className = "btn"; btn.innerText = label;
+        btn.onclick = (e) => { e.currentTarget.blur(); callback.call(this); };
+        this.controls.appendChild(btn);
+    },
+
+    drawStarterSelect() {
+        this.controls.innerHTML = "";
+        this.write("=== MATRIX QUEST II: THE OUTBACK LEDGER ===\nSelect a Gen-2 routing core daemon to compile onto your active memory frame stack:");
+        this.createButton("NITROFOX.EXE [Plasma/Cyber]", () => this.claimStarter("Nitrofox"));
+        this.createButton("CODEVITRU.SYS [Cyber/Mecha]", () => this.claimStarter("Codevitru"));
+        this.createButton("MECHASPROUT.BAT [Bio/Mecha]", () => this.claimStarter("Mechasprout"));
+    },
+
+    claimStarter(key) {
+        this.playerParty = [new Monster(key, 5), new Monster("Rootclash", 30), new Monster("Voltsnap", 30), new Monster("Chiptoad", 25)];
+        this.activeMon = this.playerParty[0];
+        this.loadOverworldLayer();
+    },
+
+    loadOverworldLayer() {
+        this.gameState = "OVERWORLD";
+        this.combatEl.style.display = "none";
+        this.gridContainer.style.display = "grid";
+        this.playerEl.style.display = "flex";
+        this.updatePlayerTokenPosition();
+        this.locTag.innerText = "DECK NODE: SECTOR_05 OUTBACK";
+        this.shardTag.innerText = `FRAGMENTS: ${this.shards}F`;
+        this.controls.innerHTML = "";
+        this.write("⚡ CONNECTION LIVE: Use WASD / Arrow Keys to drive your node frame down the sector pipeline. Step into pink data matrices [░] to scan for roaming rogue daemons.");
+        this.createButton("📋 Review Core Configuration Stack", () => this.openPartyMenu());
+    },
+
+    executeMoveStep(x, y) {
+        if (y < 0 || y >= 8 || x < 0 || x >= 16) return;
+        if (MAP_LAYOUT[y][x] === 2) return;
+
+        this.playerGridX = x; this.playerGridY = y;
+        this.updatePlayerTokenPosition();
+
+        let tileType = MAP_LAYOUT[y][x];
+        if (tileType === 5) {
+            this.playerParty.forEach(m => m.hp = m.maxHp);
+            this.write("⚡ SANCTUARY TERMINAL INTERACTION: Core voltage variables and subroutines fully refreshed to 100% full capacity.");
+        } 
+        else if (tileType === 1 && Math.random() < 0.2) {
+            this.triggerRandomEncounter();
+        }
+    },
+
+    openPartyMenu() {
+        this.gameState = "MENU";
+        this.controls.innerHTML = "";
+        let log = "=== CYBER-DECK MEMORY DIRECTORY ===\nSelect target file path to route forward into active socket:\n\n";
+        this.playerParty.forEach((m, i) => log += `[Slot ${i+1}] ${m.name} - Lv${m.level} (${m.hp}/${m.maxHp} HP)\n`);
+        this.write(log);
+
+        this.playerParty.forEach((m) => {
+            this.createButton(`${m.name}`, () => {
+                if (m.hp <= 0) { alert("Cannot mount an offline trace structure!"); return; }
+                this.activeMon = m; this.loadOverworldLayer();
+            });
+        });
+        this.createButton("<< RETURN", () => this.loadOverworldLayer());
+    },
+
+    triggerRandomEncounter() {
+        this.gameState = "BATTLE"; this.battleSubState = "MAIN";
+        const pool = ["Rustscale", "Shardhawk", "Overhop", "Scraptinger"];
+        this.enemyMon = new Monster(pool[Math.floor(Math.random() * pool.length)], Math.floor(Math.random() * 4) + 6);
+        
+        this.gridContainer.style.display = "none"; this.playerEl.style.display = "none";
+        this.controls.innerHTML = "";
+        this.write(`⚠️ ENCOUNTER WARNING: Rogue daemon firewall [${this.enemyMon.name}] has intercepted your socket line! Initializing combat interface vectors...`);
+        
+        setTimeout(() => {
+            this.combatEl.style.display = "flex";
+            this.loadBattleUI();
+        }, 1200);
+    },
+
+    syncCombatHuds() {
+        const aData = CORE_INDEX[this.activeMon.species];
+        document.getElementById("ally-name").innerText = this.activeMon.name;
+        document.getElementById("ally-hp-txt").innerText = `${this.activeMon.hp}/${this.activeMon.maxHp}`;
+        document.getElementById("ally-hp-bar").style.width = `${(this.activeMon.hp / this.activeMon.maxHp)*100}%`;
+        document.getElementById("ally-hp-bar").style.backgroundColor = aData.color;
+        document.getElementById("ally-avatar").innerText = aData.symbol;
+
+        const eData = CORE_INDEX[this.enemyMon.species];
+        document.getElementById("enemy-name").innerText = this.enemyMon.name;
+        document.getElementById("enemy-hp-txt").innerText = `${this.enemyMon.hp}/${this.enemyMon.maxHp}`;
+        document.getElementById("enemy-hp-bar").style.width = `${(this.enemyMon.hp / this.enemyMon.maxHp)*100}%`;
+        document.getElementById("enemy-hp-bar").style.backgroundColor = eData.color;
+        document.getElementById("enemy-avatar").innerText = eData.symbol;
+    },
+
+    loadBattleUI() {
+        this.syncCombatHuds();
+        this.controls.innerHTML = "";
+
+        if (this.battleSubState === "MAIN") {
+            this.createButton("⚔️ Run Subroutine", () => { this.battleSubState = "FIGHT"; this.loadBattleUI(); });
+            this.createButton("🎒 Utility Bag", () => { this.battleSubState = "BAG"; this.loadBattleUI(); });
+            this.createButton("🏃 Jack Out (Flee)", () => {
+                this.write("Disconnecting socket traces... Safely bounced back onto overworld matrix.");
+                setTimeout(() => this.loadOverworldLayer(), 1200);
+            });
+        } else if (this.battleSubState === "FIGHT") {
+            this.activeMon.moves.forEach(m => {
+                this.createButton(m, () => this.executeActionTurnStack({type: "MOVE", name: m}));
+            });
+            this.createButton("<< BACK", () => { this.battleSubState = "MAIN"; this.loadBattleUI(); });
+        } else if (this.battleSubState === "BAG") {
+            Object.keys(this.inventory).forEach(k => {
+                this.createButton(`${k} (${this.inventory[k]})`, () => {
+                    this.executeActionTurnStack({type: k === "Link Card" ? "CAPTURE" : "ITEM", name: k});
+                }, this.inventory[k] <= 0);
+            });
+            this.createButton("<< BACK", () => { this.battleSubState = "MAIN"; this.loadBattleUI(); });
+        }
+    },
+
+    executeActionTurnStack(act) {
+        this.controls.innerHTML = "";
+        let log = "";
+        const eMoveKey = this.enemyMon.moves[Math.floor(Math.random() * this.enemyMon.moves.length)];
+        
+        let turns = [];
+        if (act.type !== "MOVE" || this.activeMon.spd >= this.enemyMon.spd) {
+            turns = [{p: true, a: act}, {p: false, a: {type: "MOVE", name: eMoveKey}}];
+        } else {
+            turns = [{p: false, a: {type: "MOVE", name: eMoveKey}}, {p: true, a: act}];
+        }
+
+        let ended = false;
+        for (let t of turns) {
+            if (ended) break;
+            if (t.p) {
+                if (this.activeMon.hp <= 0) continue;
+                if (t.a.type === "ITEM") {
+                    this.inventory[t.a.name]--;
+                    this.activeMon.hp = Math.min(this.activeMon.maxHp, this.activeMon.hp + 50);
+                    log += `👉 Parsed Nano-Repair tool patch. Re-compiled +50 Integrity parameters into ${this.activeMon.name}.\n`;
+                    this.syncCombatHuds();
+                } else if (t.a.type === "CAPTURE") {
+                    this.inventory[t.a.name]--; log += `👉 Transmitting Link Card structural capture overlay handshake... `;
+                    let rate = ((this.enemyMon.maxHp - this.enemyMon.hp) * 150) / this.enemyMon.maxHp;
+                    if (Math.random() * 100 < rate) {
+                        log += `SUCCESS! Hostile signature rewritten cleanly into party arrays!\n`;
+                        this.playerParty.push(this.enemyMon); ended = true; this.write(log);
+                        setTimeout(() => this.loadOverworldLayer(), 2500); return;
+                    } else log += `FAILED. Packet handshake rejected.\n`;
+                } else {
+                    let m = MOVES[t.a.name]; let d = this.calculateDamage(this.activeMon, this.enemyMon, m);
+                    this.enemyMon.hp = Math.max(0, this.enemyMon.hp - d);
+                    log += `💥 ${this.activeMon.name} executed [${m.name}]! Caused ${d} integrity loss to firewall.\n`;
+                    this.syncCombatHuds();
+                    
+                    if (m.drains) {
+                        let h = Math.floor(d * 0.5); this.activeMon.hp = Math.min(this.activeMon.maxHp, this.activeMon.hp + h);
+                        log += `💚 [SIPHON]: Data Drain routine pulled +${h} health frames back to primary deck socket.\n`;
+                        this.syncCombatHuds();
+                    }
+                    if (this.enemyMon.hp <= 0) {
+                        log += `🏆 Hostile process crashed offline. Recovered +25 Fragment Shards.\n`;
+                        this.shards += 25; ended = true; this.write(log);
+                        setTimeout(() => this.loadOverworldLayer(), 2500); return;
+                    }
+                }
+            } else {
+                if (this.enemyMon.hp <= 0) continue;
+                let m = MOVES[t.a.name]; let d = this.calculateDamage(this.enemyMon, this.activeMon, m);
+                this.activeMon.hp = Math.max(0, this.activeMon.hp - d);
+                log += `⚠️ Wild ${this.enemyMon.name} launched [${m.name}]! Delivered ${d} damage parameters down socket.\n`;
+                this.syncCombatHuds();
+                
+                if (this.activeMon.hp <= 0) {
+                    log += `💀 THREAD EXCEPTION: ${this.activeMon.name} trace severed!\n`;
+                    let live = this.playerParty.find(x => x.hp > 0);
+                    if (live) { this.activeMon = live; log += `Hot-swapped backup trace path: [${this.activeMon.name}] mounted.\n`; this.syncCombatHuds(); }
+                    else {
+                        log += `❌ CRITICAL COLLAPSE: All deck traces blanked! Re-routing broken data packets to Sector Base...`;
+                        ended = true; this.write(log); this.playerParty.forEach(x => x.hp = x.maxHp); this.activeMon = this.playerParty[0];
+                        setTimeout(() => this.loadOverworldLayer(), 4000); return;
+                    }
+                }
+            }
+        }
+        this.write(log); this.battleSubState = "MAIN";
+        setTimeout(() => this.loadBattleUI(), 2500);
+    },
+
+    calculateDamage(att, def, move) {
+        let mod = 1;
+        def.types.forEach(t => { if (TYPE_CHART[move.type] && TYPE_CHART[move.type][t] !== undefined) mod *= TYPE_CHART[move.type][t]; });
+        return Math.floor((((2 * att.level / 5 + 2) * move.power * (att.atk / def.def)) / 50) + 2) * mod;
+    }
+};
+
+document.addEventListener("DOMContentLoaded", () => { setTimeout(() => GameEngine.init(), 100); });
+</script>
+
+</body>
+</html>
