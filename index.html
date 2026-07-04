@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Matrix Quest II: The Outback Ledger</title>
+    <title>Matrix Quest II: The Outback Ledger (Story Edition)</title>
     <style>
         body {
             background-color: #0c0e17;
@@ -134,7 +134,7 @@
 
         .hud-name { font-weight: bold; color: #00ffcc; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .bar-container { width: 100%; background: #1b1f35; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 3px; }
-        .hp-bar { height: 100%; background: #bc00dd; width: 100%; transition: width 0.3s ease; }
+        .hp-bar { height: 100%; background: #bc00dd; width: 100%; transition: width 0.2s ease; }
 
         .combat-avatar {
             font-size: 32px;
@@ -147,11 +147,11 @@
         }
 
         #display-window {
-            height: 100px;
+            height: 120px;
             padding: 12px;
             box-sizing: border-box;
             color: #a9b1d6;
-            font-size: 12px;
+            font-size: 11px;
             line-height: 1.4;
             overflow-y: auto;
             white-space: pre-line;
@@ -254,14 +254,6 @@ const MOVES = {
     "Data Drain":    { name: "Data Drain", type: "Bio", power: 60, drains: true }
 };
 
-const TYPE_CHART = {
-    Primal: { Primal: 1, Plasma: 1, Cyber: 1, Bio: 1, Mecha: 1 },
-    Plasma: { Primal: 1, Plasma: 0.9, Cyber: 1.2, Bio: 1, Mecha: 1.1 },
-    Cyber:  { Primal: 1.1, Plasma: 1.1, Cyber: 0.9, Bio: 1.1, Mecha: 1 },
-    Bio:    { Primal: 1.1, Plasma: 0.9, Cyber: 1.1, Bio: 0.95, Mecha: 1.2 },
-    Mecha:  { Primal: 1.1, Plasma: 1, Cyber: 1.2, Bio: 1.1, Mecha: 0.95 }
-};
-
 const CORE_INDEX = {
     "Nitrofox":    { name: "NITROFOX.EXE", symbol: "🦊", color: "#ff00ff", types: ["Plasma", "Cyber"], baseHp: 45, baseAtk: 62, baseDef: 35, baseSpd: 98, moves: ["Strike", "Nitro Burn"] },
     "Codevitru":   { name: "CODEVITRU.SYS", symbol: "🤖", color: "#00ffff", types: ["Cyber", "Mecha"], baseHp: 55, baseAtk: 48, baseDef: 65, baseSpd: 40, moves: ["Strike", "Overclock.exe"] },
@@ -276,6 +268,28 @@ const CORE_INDEX = {
     "Voltsnap":    { name: "[VET] VOLTSNAP", symbol: "⚡", color: "#ff007f", types: ["Plasma"], baseHp: 42, baseAtk: 58, baseDef: 38, baseSpd: 95, moves: ["Strike", "Nitro Burn", "Logic Spike", "Voltage Kick"] },
     "Chiptoad":    { name: "[VET] CHIPTOAD", symbol: "🐸", color: "#228b22", types: ["Bio"], baseHp: 65, baseAtk: 45, baseDef: 60, baseSpd: 30, moves: ["Strike", "Spore Injection", "Data Drain", "Acid Bite"] }
 };
+
+const TYPE_CHART = {
+    Plasma: { Cyber: 2, Mecha: 0.5, Bio: 0.5 },
+    Bio:    { Plasma: 2, Mecha: 2, Cyber: 0.5 },
+    Cyber:  { Bio: 2, Plasma: 0.5, Mecha: 0.5 },
+    Mecha:  { Cyber: 2, Plasma: 2, Bio: 0.5 },
+    Primal: {}
+};
+
+const LANDMARK_LOGS = [
+    "LOG: Crushed fiber coils stretch across the red dust... traces of an old 2024 architecture.",
+    "LOG: High-voltage hum detected from a half-buried corporate relay tower nearby.",
+    "LOG: The air smells like hot silicon. Stray packets leak from an exposed conduit root.",
+    "LOG: Scanning structural debris... This was once a secure mainframe spire database before the crash."
+];
+
+const ENEMY_INTEL_LOGS = [
+    "DECRYPTED INTEL: Core files suggest corporate board lose control over this sector months ago...",
+    "DECRYPTED INTEL: High-frequency scrubbing scripts are sweeping Sector 05 to mask a massive data leak.",
+    "DECRYPTED INTEL: The Alpha Sovereign node was weaponized as an automated wipe routine.",
+    "DECRYPTED INTEL: Outpost grids are ancient secure data backup nodes left behind by developers."
+];
 
 class Monster {
     constructor(speciesName, level = 5) {
@@ -348,7 +362,7 @@ const GameEngine = {
 
     drawStarterSelect() {
         this.controls.innerHTML = "";
-        this.write("=== MATRIX QUEST II: THE OUTBACK LEDGER ===\nSelect a Gen-2 routing core daemon to compile onto your active memory frame stack:");
+        this.write("=== [ENCRYPTED SIGNAL INTERCEPT: YEAR 2026] ===\n'They isolated the spire crash damage by throwing a massive block over Sector 05. The Outback Ledger is an unmapped wasteland of corrupted corporate files. High-level scrubbing scripts have been dispatched to purge everything cleanly. If they lock down the partition, your legacy crew is permanent scrap. Choose a Gen-2 routing core daemon and boot up your deck immediately...'\n\nSelect core architecture setup routine:");
         this.createButton("NITROFOX.EXE [Plasma/Cyber]", () => this.claimStarter("Nitrofox"));
         this.createButton("CODEVITRU.SYS [Cyber/Mecha]", () => this.claimStarter("Codevitru"));
         this.createButton("MECHASPROUT.BAT [Bio/Mecha]", () => this.claimStarter("Mechasprout"));
@@ -369,10 +383,8 @@ const GameEngine = {
         this.locTag.innerText = "DECK NODE: SECTOR_05 OUTBACK";
         this.shardTag.innerText = `FRAGMENTS: ${this.shards}F`;
         this.controls.innerHTML = "";
-        this.write("⚡ CONNECTION LIVE: Use WASD / Arrow Keys to drive your node frame down the sector pipeline. Step into pink data matrices [░] to scan for roaming rogue daemons.");
+        this.write("⚡ NAVIGATION SOCKET LIVE: Use WASD / Arrow Keys to drive your node frame down the sector pipeline.\n\n[OBJECTIVE]: Navigate the red data flats. Step into pink matrix fields [░] to scan for roaming firewall nodes and bypass corporate encryption layers.");
         this.createButton("📋 Review Core Configuration Stack", () => this.openPartyMenu());
-        
-        // FOCUS PATCH: Instantly capture browser window event tracking back onto the active document frame
         window.focus();
     },
 
@@ -386,10 +398,16 @@ const GameEngine = {
         let tileType = MAP_LAYOUT[y][x];
         if (tileType === 5) {
             this.playerParty.forEach(m => m.hp = m.maxHp);
-            this.write("⚡ SANCTUARY TERMINAL INTERACTION: Core voltage variables and subroutines fully refreshed to 100% full capacity.");
+            this.write("⚡ SANCTUARY HUB INTERACTION: Ancient backup node active. Routed power to local terminal gates. Core voltage metrics and subroutines refreshed to 100% full capacity.");
         } 
-        else if (tileType === 1 && Math.random() < 0.2) {
-            this.triggerRandomEncounter();
+        else if (tileType === 1) {
+            let rnd = Math.random();
+            if (rnd < 0.2) {
+                this.triggerRandomEncounter();
+            } else if (rnd < 0.4) {
+                let msg = LANDMARK_LOGS[Math.floor(Math.random() * LANDMARK_LOGS.length)];
+                this.write(msg);
+            }
         }
     },
 
@@ -416,12 +434,10 @@ const GameEngine = {
         
         this.gridContainer.style.display = "none"; this.playerEl.style.display = "none";
         this.controls.innerHTML = "";
-        this.write(`⚠️ ENCOUNTER WARNING: Rogue daemon firewall [${this.enemyMon.name}] has intercepted your socket line! Initializing combat interface vectors...`);
+        this.write(`🚨 CONTACT WARNING: Rogue tracking script [${this.enemyMon.name}] has flagged your signature parameters! Initializing combat interface arrays...`);
         
-        setTimeout(() => {
-            this.combatEl.style.display = "flex";
-            this.loadBattleUI();
-        }, 1200);
+        this.combatEl.style.display = "flex";
+        this.loadBattleUI();
     },
 
     syncCombatHuds() {
@@ -449,7 +465,7 @@ const GameEngine = {
             this.createButton("🎒 Utility Bag", () => { this.battleSubState = "BAG"; this.loadBattleUI(); });
             this.createButton("🏃 Jack Out (Flee)", () => {
                 this.write("Disconnecting socket traces... Safely bounced back onto overworld matrix.");
-                setTimeout(() => this.loadOverworldLayer(), 1200);
+                this.loadOverworldLayer();
             });
         } else if (this.battleSubState === "FIGHT") {
             this.activeMon.moves.forEach(m => {
@@ -492,9 +508,10 @@ const GameEngine = {
                     this.inventory[t.a.name]--; log += `👉 Transmitting Link Card structural capture overlay handshake... `;
                     let rate = ((this.enemyMon.maxHp - this.enemyMon.hp) * 150) / this.enemyMon.maxHp;
                     if (Math.random() * 100 < rate) {
-                        log += `SUCCESS! Hostile signature rewritten cleanly into party arrays!\n`;
+                        let intel = ENEMY_INTEL_LOGS[Math.floor(Math.random() * ENEMY_INTEL_LOGS.length)];
+                        log += `SUCCESS! Hostile signature rewritten cleanly into party arrays!\n\n[EXTRACTED INTERCEPT]: ${intel}\n`;
                         this.playerParty.push(this.enemyMon); ended = true; this.write(log);
-                        setTimeout(() => this.loadOverworldLayer(), 2500); return;
+                        this.loadOverworldLayer(); return;
                     } else log += `FAILED. Packet handshake rejected.\n`;
                 } else {
                     let m = MOVES[t.a.name]; let d = this.calculateDamage(this.activeMon, this.enemyMon, m);
@@ -508,9 +525,10 @@ const GameEngine = {
                         this.syncCombatHuds();
                     }
                     if (this.enemyMon.hp <= 0) {
-                        log += `🏆 Hostile process crashed offline. Recovered +25 Fragment Shards.\n`;
+                        let intel = ENEMY_INTEL_LOGS[Math.floor(Math.random() * ENEMY_INTEL_LOGS.length)];
+                        log += `🏆 Hostile process crashed offline. Recovered +25 Fragment Shards.\n\n[EXTRACTED INTERCEPT]: ${intel}\n`;
                         this.shards += 25; ended = true; this.write(log);
-                        setTimeout(() => this.loadOverworldLayer(), 2500); return;
+                        this.loadOverworldLayer(); return;
                     }
                 }
             } else {
@@ -527,26 +545,19 @@ const GameEngine = {
                     else {
                         log += `❌ CRITICAL COLLAPSE: All deck traces blanked! Re-routing broken data packets to Sector Base...`;
                         ended = true; this.write(log); this.playerParty.forEach(x => x.hp = x.maxHp); this.activeMon = this.playerParty[0];
-                        setTimeout(() => this.loadOverworldLayer(), 4000); return;
+                        this.loadOverworldLayer(); return;
                     }
                 }
             }
         }
         this.write(log); this.battleSubState = "MAIN";
-        setTimeout(() => this.loadBattleUI(), 2500);
+        this.loadBattleUI();
     },
 
     calculateDamage(att, def, move) {
-        if (!att || !def || !move || !move.power) return 0;
-
         let mod = 1;
-        const typeChart = TYPE_CHART[move.type] || {};
-        def.types.forEach(t => {
-            if (typeChart[t] !== undefined) mod *= typeChart[t];
-        });
-
-        const rawDamage = Math.floor((((2 * att.level / 5 + 2) * move.power * (att.atk / def.def)) / 50) + 2) * mod;
-        return Math.max(0, Math.floor(rawDamage));
+        def.types.forEach(t => { if (TYPE_CHART[move.type] && TYPE_CHART[move.type][t] !== undefined) mod *= TYPE_CHART[move.type][t]; });
+        return Math.floor((((2 * att.level / 5 + 2) * move.power * (att.atk / def.def)) / 50) + 2) * mod;
     }
 };
 
