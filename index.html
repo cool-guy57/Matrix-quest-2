@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Matrix Quest II: The Outback Ledger (Story Edition)</title>
+    <title>MatrixQuest II: Beyond the Grid</title>
     <style>
         body {
-            background-color: #0c0e17;
-            color: #bc00dd;
+            background-color: #07080e;
+            color: #00f0ff;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
             flex-direction: column;
@@ -18,550 +18,820 @@
         }
 
         #game-container {
-            width: 512px;
-            box-shadow: 0 0 40px rgba(188, 0, 221, 0.4);
-            border: 6px solid #2b1c3f;
-            background: #020205;
-            border-radius: 4px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #header-display {
-            background: #090a12;
-            border-bottom: 4px solid #2b1c3f;
-            padding: 12px;
-            color: #fff;
-            font-size: 11px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        #screen-viewport {
-            width: 512px;
-            height: 256px;
             position: relative;
-            background: #05020a;
-            border-bottom: 4px solid #2b1c3f;
-            overflow: hidden;
+            box-shadow: 0 0 45px rgba(0, 240, 255, 0.35);
+            border: 6px solid #16192b;
+            background: #020204;
+            border-radius: 6px;
         }
 
-        #map-grid {
-            display: grid;
-            grid-template-columns: repeat(16, 32px);
-            grid-template-rows: repeat(8, 32px);
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        #ui-overlay {
             width: 512px;
-            height: 256px;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .tile {
-            width: 32px;
-            height: 32px;
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .tile-floor { background-color: #090514; }
-        
-        .tile-grass { 
-            background-color: rgba(188, 0, 221, 0.15); 
-            border: 1px dashed rgba(188, 0, 221, 0.3);
-            color: #bc00dd;
-        }
-
-        .tile-wall { 
-            background-color: #2b1c3f; 
-            border: 1px solid #bc00dd;
-        }
-
-        .tile-terminal {
-            background-color: rgba(0, 255, 204, 0.2);
-            border: 2px solid #00ffcc;
-            color: #00ffcc;
-            font-weight: bold;
-            animation: terminalGlow 1.5s ease-in-out infinite alternate;
-        }
-
-        @keyframes terminalGlow {
-            0% { box-shadow: inset 0 0 5px #00ffcc; }
-            100% { box-shadow: inset 0 0 15px #00ffcc; }
-        }
-
-        #player-node {
-            width: 32px;
-            height: 32px;
-            position: absolute;
-            background: #fff;
-            border: 2px solid #00ffcc;
-            box-shadow: 0 0 12px #00ffcc;
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #020205;
-            font-size: 14px;
-            transition: left 0.1s ease, top 0.1s ease;
-            z-index: 5;
-        }
-
-        #combat-interface {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, #05020a 0%, #120720 100%);
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-            box-sizing: border-box;
-        }
-
-        .visual-hud {
-            background: rgba(4, 4, 7, 0.9);
-            border: 2px solid #bc00dd;
-            padding: 6px 10px;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 10px;
-            width: 140px;
-        }
-
-        .hud-name { font-weight: bold; color: #00ffcc; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .bar-container { width: 100%; background: #1b1f35; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 3px; }
-        .hp-bar { height: 100%; background: #bc00dd; width: 100%; transition: width 0.2s ease; }
-
-        .combat-avatar {
-            font-size: 32px;
-            animation: float 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); filter: brightness(1); }
-            100% { transform: translateY(-6px); filter: brightness(1.2); }
-        }
-
-        #display-window {
-            height: 120px;
-            padding: 12px;
-            box-sizing: border-box;
+            background: #0a0c16;
             color: #a9b1d6;
-            font-size: 11px;
-            line-height: 1.4;
-            overflow-y: auto;
-            white-space: pre-line;
-            border-bottom: 4px solid #2b1c3f;
-            background: #020205;
-        }
-
-        #ui-controls {
-            background: #040407;
-            padding: 10px;
-            display: grid;
+            box-sizing: border-box;
+            padding: 12px;
+            border-top: 4px solid #16192b;
+            display: grid; 
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            min-height: 90px;
+            gap: 8px;
         }
 
         .btn {
-            background: #161224;
-            color: #bc00dd;
-            border: 3px solid #bc00dd;
+            background: #101322;
+            color: #00f0ff;
+            border: 2px solid #00f0ff;
             padding: 10px;
             font-weight: bold;
             cursor: pointer;
             text-align: center;
             text-transform: uppercase;
-            font-size: 10px;
+            font-size: 11px;
             letter-spacing: 1px;
             box-shadow: 2px 2px 0px #000;
+            transition: all 0.1s ease;
         }
 
         .btn:hover {
-            background: #2b1c3f;
-            color: #00ffcc;
-            border-color: #00ffcc;
+            background: #1d223a;
+            color: #ff0055;
+            border-color: #ff0055;
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px #000;
         }
 
-        .btn-disabled { background: #0a0a0f !important; color: #444 !important; border-color: #333 !important; cursor: not-allowed !important; box-shadow: none !important; }
+        #dialogue-box {
+            grid-column: span 2;
+            background: #04050a;
+            border: 2px solid #16192b;
+            padding: 10px;
+            min-height: 58px;
+            font-size: 12px;
+            line-height: 1.4;
+            font-weight: bold;
+            color: #fff;
+            white-space: pre-line;
+        }
+
+        #controls-legend {
+            margin-top: 15px;
+            color: #565f89;
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="header-display">
-        <span id="loc-tag">DECK SECURE: INITIALIZING</span>
-        <span id="shard-tag">FRAGMENTS: 75F</span>
+    <canvas id="gameCanvas" width="512" height="384"></canvas>
+    <div id="ui-overlay">
+        <div id="dialogue-box">Initializing Sub-Level Kernel...</div>
+        <div id="menu-buttons" style="grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"></div>
     </div>
+</div>
 
-    <div id="screen-viewport">
-        <div id="map-grid"></div>
-        <div id="player-node" style="display: none;">P</div>
-
-        <div id="combat-interface">
-            <div class="visual-hud">
-                <div id="ally-name" class="hud-name">---</div>
-                <div>INTEGRITY: <span id="ally-hp-txt">0/0</span></div>
-                <div class="bar-container"><div id="ally-hp-bar" class="hp-bar"></div></div>
-            </div>
-            <div id="ally-avatar" class="combat-avatar">🦊</div>
-            
-            <div style="font-size: 16px; font-weight: bold; color: #ff0055;">VS</div>
-            
-            <div id="enemy-avatar" class="combat-avatar">🐊</div>
-            <div class="visual-hud">
-                <div id="enemy-name" class="hud-name">---</div>
-                <div>INTEGRITY: <span id="enemy-hp-txt">0/0</span></div>
-                <div class="bar-container"><div id="enemy-hp-bar" class="hp-bar"></div></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="display-window">Mounting Matrix Quest II Operational Command Stack...</div>
-    <div id="ui-controls"></div>
+<div id="controls-legend">
+    <strong>[MATRIX PROTOCOLS II]</strong><br>
+    Grid Navigation: <strong>Arrow Keys / WASD</strong> | Action / Select: <strong>Spacebar / Enter</strong><br>
+    Compile Save Profile: <strong>Press 'P' Key</strong>
 </div>
 
 <script>
-const MAP_LAYOUT = [
-    [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
-    [2,0,0,0,0,0,1,1,1,1,0,0,0,0,5,2],
-    [2,0,0,0,0,0,1,1,1,1,0,0,0,0,0,2],
-    [2,0,0,2,2,0,0,0,0,0,0,2,2,0,0,2],
-    [2,0,0,2,2,0,0,0,0,0,0,2,2,0,0,2],
-    [2,1,1,1,1,0,0,0,0,0,0,1,1,1,1,2],
-    [2,1,1,1,1,0,0,0,0,0,0,1,1,1,1,2],
-    [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
-];
-
-const MOVES = {
-    "Strike":        { name: "Strike", type: "Primal", power: 35 },
-    "Nitro Burn":    { name: "Nitro Burn", type: "Plasma", power: 70 },
-    "Overclock.exe": { name: "Overclock.exe", type: "Cyber", power: 50 },
-    "Matrix Cleave": { name: "Matrix Cleave", type: "Cyber", power: 80 },
-    "Bio-Siphon":    { name: "Bio-Siphon", type: "Bio", power: 65, drains: true },
-    "Hydraulic Crush":{ name: "Hydraulic Crush", type: "Mecha", power: 75 },
-    "Prism Beam":    { name: "Prism Beam", type: "Plasma", power: 65 },
-    "Voltage Kick":  { name: "Voltage Kick", type: "Plasma", power: 70 },
-    "Trojan Injection":{ name: "Trojan Injection", type: "Cyber", power: 60, drains: true },
-    "Spore Injection":{ name: "Spore Injection", type: "Bio", power: 40 },
-    "Logic Spike":   { name: "Logic Spike", type: "Cyber", power: 40 },
-    "Acid Bite":     { name: "Acid Bite", type: "Bio", power: 55 },
-    "Data Drain":    { name: "Data Drain", type: "Bio", power: 60, drains: true }
-};
-
-const CORE_INDEX = {
-    "Nitrofox":    { name: "NITROFOX.EXE", symbol: "🦊", color: "#ff00ff", types: ["Plasma", "Cyber"], baseHp: 45, baseAtk: 62, baseDef: 35, baseSpd: 98, moves: ["Strike", "Nitro Burn"] },
-    "Codevitru":   { name: "CODEVITRU.SYS", symbol: "🤖", color: "#00ffff", types: ["Cyber", "Mecha"], baseHp: 55, baseAtk: 48, baseDef: 65, baseSpd: 40, moves: ["Strike", "Overclock.exe"] },
-    "Mechasprout": { name: "MECHASPROUT.BAT", symbol: "🌱", color: "#7cfc00", types: ["Bio", "Mecha"], baseHp: 52, baseAtk: 55, baseDef: 50, baseSpd: 55, moves: ["Strike", "Bio-Siphon"] },
-    
-    "Rustscale":   { name: "RUSTSCALE.THI", symbol: "🐊", color: "#b87333", types: ["Mecha", "Bio"], baseHp: 70, baseAtk: 60, baseDef: 65, baseSpd: 35, moves: ["Strike", "Hydraulic Crush"] },
-    "Shardhawk":   { name: "SHARDHAWK.LOG", symbol: "🦅", color: "#da70d6", types: ["Plasma", "Cyber"], baseHp: 50, baseAtk: 65, baseDef: 40, baseSpd: 95, moves: ["Strike", "Prism Beam"] },
-    "Overhop":     { name: "OVERHOP.PRT", symbol: "🦘", color: "#ff4500", types: ["Plasma", "Bio"], baseHp: 55, baseAtk: 70, baseDef: 45, baseSpd: 85, moves: ["Strike", "Voltage Kick"] },
-    "Scraptinger": { name: "SCRAPTINGER.VRS", symbol: "🦂", color: "#d2691e", types: ["Cyber", "Mecha"], baseHp: 45, baseAtk: 58, baseDef: 50, baseSpd: 75, moves: ["Strike", "Trojan Injection"] },
-    
-    "Rootclash":   { name: "[VET] ROOTCLASH", symbol: "⬢", color: "#39ff14", types: ["Bio"], baseHp: 50, baseAtk: 52, baseDef: 55, baseSpd: 38, moves: ["Strike", "Spore Injection", "Acid Bite", "Data Drain"] },
-    "Voltsnap":    { name: "[VET] VOLTSNAP", symbol: "⚡", color: "#ff007f", types: ["Plasma"], baseHp: 42, baseAtk: 58, baseDef: 38, baseSpd: 95, moves: ["Strike", "Nitro Burn", "Logic Spike", "Voltage Kick"] },
-    "Chiptoad":    { name: "[VET] CHIPTOAD", symbol: "🐸", color: "#228b22", types: ["Bio"], baseHp: 65, baseAtk: 45, baseDef: 60, baseSpd: 30, moves: ["Strike", "Spore Injection", "Data Drain", "Acid Bite"] }
-};
-
 const TYPE_CHART = {
-    Plasma: { Cyber: 2, Mecha: 0.5, Bio: 0.5 },
-    Bio:    { Plasma: 2, Mecha: 2, Cyber: 0.5 },
-    Cyber:  { Bio: 2, Plasma: 0.5, Mecha: 0.5 },
-    Mecha:  { Cyber: 2, Plasma: 2, Bio: 0.5 },
+    Plasma: { Cyber: 2, Mecha: 0.5, Bio: 0.5, Volt: 2, Aether: 0.5 },
+    Bio:    { Plasma: 2, Mecha: 2, Cyber: 0.5, Volt: 0.5, Aether: 1 },
+    Cyber:  { Bio: 2, Plasma: 0.5, Mecha: 0.5, Volt: 2, Aether: 0.5 },
+    Mecha:  { Cyber: 2, Plasma: 2, Bio: 0.5, Volt: 0.5, Aether: 2 },
+    Volt:   { Plasma: 0.5, Bio: 2, Cyber: 0.5, Mecha: 2, Aether: 1 },
+    Aether: { Plasma: 2, Bio: 1, Cyber: 2, Mecha: 0.5, Volt: 1 },
     Primal: {}
 };
 
-const LANDMARK_LOGS = [
-    "LOG: Crushed fiber coils stretch across the red dust... traces of an old 2024 architecture.",
-    "LOG: High-voltage hum detected from a half-buried corporate relay tower nearby.",
-    "LOG: The air smells like hot silicon. Stray packets leak from an exposed conduit root.",
-    "LOG: Scanning structural debris... This was once a secure mainframe spire database before the crash."
-];
+const MOVES = {
+    "Strike":        { name: "Strike", type: "Primal", power: 35 },
+    "Laser Flare":   { name: "Laser Flare", type: "Plasma", power: 65 },
+    "Static Pulse":  { name: "Static Pulse", type: "Volt", power: 50, status: "Glitched" },
+    "Spore Injection":{ name: "Spore Injection", type: "Bio", power: 45 },
+    "Logic Spike":   { name: "Logic Spike", type: "Cyber", power: 45 },
+    "Acid Bite":     { name: "Acid Bite", type: "Bio", power: 60 },
+    "Iron Chomp":    { name: "Iron Chomp", type: "Mecha", power: 70 },
+    "Data Drain":    { name: "Data Drain", type: "Bio", power: 60, drains: true },
+    "Sync Erase":    { name: "Sync Erase", type: "Cyber", power: 80 },
+    "Volt Burst":    { name: "Volt Burst", type: "Volt", power: 75 },
+    "Aether Beam":   { name: "Aether Beam", type: "Aether", power: 85 },
+    "Overclock":     { name: "Overclock", type: "Primal", power: 0, selfBuff: true }
+};
 
-const ENEMY_INTEL_LOGS = [
-    "DECRYPTED INTEL: Core files suggest corporate board lose control over this sector months ago...",
-    "DECRYPTED INTEL: High-frequency scrubbing scripts are sweeping Sector 05 to mask a massive data leak.",
-    "DECRYPTED INTEL: The Alpha Sovereign node was weaponized as an automated wipe routine.",
-    "DECRYPTED INTEL: Outpost grids are ancient secure data backup nodes left behind by developers."
-];
+const CORE_INDEX = {
+    // Starters
+    "Sparkhound": { name: "Sparkhound", type: "Volt", baseHp: 45, baseAtk: 62, baseDef: 40, baseSpd: 98, color: "#ffcc00", moves: ["Strike", "Static Pulse"], syncRate: 200, learnTable: { 6: "Logic Spike", 10: "Volt Burst" } },
+    "Nullspider": { name: "Nullspider", type: "Aether", baseHp: 52, baseAtk: 50, baseDef: 58, baseSpd: 42, color: "#9933ff", moves: ["Strike", "Data Drain"], syncRate: 160, learnTable: { 7: "Spore Injection", 12: "Aether Beam" } },
+    "Glitchfox II":{ name: "Glitchfox II", type: "Cyber", baseHp: 40, baseAtk: 58, baseDef: 42, baseSpd: 92, color: "#00ffff", moves: ["Strike", "Logic Spike"], syncRate: 170, learnTable: { 6: "Laser Flare", 11: "Sync Erase" } },
+    
+    // Wild Encounter Pool
+    "Shadowvixen":{ name: "Shadowvixen", type: "Aether", baseHp: 48, baseAtk: 65, baseDef: 40, baseSpd: 85, color: "#ff00ff", moves: ["Strike", "Aether Beam"], syncRate: 150, learnTable: { 8: "Logic Spike" } },
+    "Mecharaptor":{ name: "Mecharaptor", type: "Mecha", baseHp: 55, baseAtk: 70, baseDef: 48, baseSpd: 65, color: "#708090", moves: ["Strike", "Iron Chomp"], syncRate: 110, learnTable: { 9: "Laser Flare" } },
+    "Bio-Hornet": { name: "Bio-Hornet", type: "Bio", baseHp: 42, baseAtk: 68, baseDef: 35, baseSpd: 95, color: "#39ff14", moves: ["Strike", "Acid Bite"], syncRate: 180, learnTable: { 7: "Spore Injection" } },
+    "Volt-Grid":  { name: "Volt-Grid", type: "Volt", baseHp: 60, baseAtk: 45, baseDef: 65, baseSpd: 35, color: "#ffee00", moves: ["Strike", "Static Pulse"], syncRate: 170, learnTable: { 8: "Volt Burst" } },
+
+    // Bosses
+    "Kernel Sentinel":{ name: "Kernel Sentinel", type: "Mecha", baseHp: 75, baseAtk: 68, baseDef: 65, baseSpd: 70, color: "#ff3300", moves: ["Iron Chomp", "Volt Burst"], syncRate: 0, learnTable: {} },
+    "Shadow Weaver": { name: "Shadow Weaver", type: "Aether", baseHp: 88, baseAtk: 72, baseDef: 62, baseSpd: 75, color: "#aa00ff", moves: ["Aether Beam", "Sync Erase"], syncRate: 0, learnTable: {} },
+    "A.E.G.I.S. Prime":{ name: "A.E.G.I.S. Prime", type: "Plasma", baseHp: 110, baseAtk: 80, baseDef: 80, baseSpd: 88, color: "#ffffff", moves: ["Laser Flare", "Sync Erase", "Overclock"], syncRate: 0, learnTable: {} }
+};
+
+const MAP_DIRECTORY = {
+    "SECTOR_04": {
+        name: "Sector 04: The Undergrid", groundColor: "#04060d", grassColor: "#ffcc00", wallColor: "#12172b", spawnPool: ["Volt-Grid", "Bio-Hornet"], levelMin: 3, levelMax: 5,
+        layout: [
+            [2,2,2,2,2,2,4,4,4,2,2,2,2,2,2,2],
+            [2,1,1,1,0,0,0,0,5,0,0,1,1,1,1,2],
+            [2,1,1,1,0,0,0,0,0,0,0,1,1,1,1,2],
+            [2,1,1,1,0,2,2,2,2,0,0,1,1,1,1,2],
+            [2,0,0,0,0,2,2,2,2,0,0,0,0,0,0,2],
+            [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+            [2,0,0,0,0,0,0,0,0,0,0,0,2,2,0,2],
+            [2,1,1,0,0,0,2,2,2,0,0,0,2,2,0,2],
+            [2,2,2,2,2,0,0,0,3,0,0,0,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ],
+        npcs: [
+            { id: "ghost_node", name: "GHOST NODE", gridX: 6, gridY: 5, color: "#00ffff", lines: ["The Mainframe purged Sector 01. We are deep in the Undergrid now.", "Defeat Kernel Sentinel up North to obtain the Overclock Override key."] },
+            { id: "patcher_mike", name: "PATCHER-MIKE", gridX: 10, gridY: 5, color: "#ff9900", isShop: true, lines: ["Need fresh subroutines? Let's check your fragment bank."] }
+        ],
+        northWarp: { mapKey: "SECTOR_05", spawnX: 8, spawnY: 6 }, 
+        southWarp: { mapKey: "SECTOR_06", spawnX: 8, spawnY: 1 }
+    },
+    "SECTOR_05": {
+        name: "Sector 05: Cyber-Waste Junkyard", groundColor: "#12031a", grassColor: "#ff00ff", wallColor: "#090d18", spawnPool: ["Shadowvixen", "Mecharaptor"], levelMin: 6, levelMax: 9,
+        layout: [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,0,0,0,0,2,2,2,2,2],
+            [2,0,0,0,1,1,1,0,0,0,0,0,0,0,0,2],
+            [2,0,2,0,1,1,1,1,1,1,1,0,2,2,0,2],
+            [2,0,2,0,0,0,0,0,0,0,0,0,2,2,0,2],
+            [2,0,2,2,2,2,0,0,0,2,2,2,2,2,0,2],
+            [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+            [2,1,1,0,0,0,0,0,0,0,0,0,0,1,1,2],
+            [2,2,2,2,2,2,2,4,4,4,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ],
+        npcs: [
+            { id: "sentinel_boss", name: "KERNEL SENTINEL", gridX: 11, gridY: 2, color: "#ff3300", isBoss: true, lines: ["ANOMALY DETECTED IN CYBER-WASTE.", "Executing purge sequence v2.0..."] }
+        ],
+        southWarp: { mapKey: "SECTOR_04", spawnX: 7, spawnY: 2 } 
+    },
+    "SECTOR_06": {
+        name: "Sector 06: Aegis Spire Nexus", groundColor: "#05131a", grassColor: "#00ffcc", wallColor: "#ffffff", spawnPool: ["Shadowvixen", "Volt-Grid"], levelMin: 10, levelMax: 14,
+        layout: [
+            [2,2,2,2,2,2,2,4,4,4,2,2,2,2,2,2],
+            [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+            [2,0,1,1,1,1,1,1,1,1,1,1,1,1,0,2],
+            [2,0,1,0,0,0,0,0,0,0,0,0,0,1,0,2],
+            [2,0,1,0,0,2,2,0,2,2,0,0,0,1,0,2],
+            [2,0,1,0,0,0,0,0,0,0,0,0,0,1,0,2],
+            [2,0,1,1,1,1,1,1,1,1,1,1,1,1,0,2],
+            [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ],
+        npcs: [
+            { id: "weaver_boss", name: "SHADOW WEAVER", gridX: 7, gridY: 4, color: "#aa00ff", isBoss: true, lines: ["YOU HAVE REACHED THE SPIRE.", "PREPARE TO HAVE YOUR CORE DELETED!"]},
+            { id: "aegis_prime_boss", name: "A.E.G.I.S. PRIME", gridX: 7, gridY: 1, color: "#ffffff", isBoss: true, lines: ["I AM THE FINAL HARDENED CORE.", "REBOOTING ENTIRE MATRIX GRID..."]}
+        ],
+        northWarp: { mapKey: "SECTOR_04", spawnX: 8, spawnY: 7 } 
+    }
+};
+
+const SoundFX = {
+    ctx: null,
+    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    play(type) {
+        this.init(); if (!this.ctx) return;
+        const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination); const now = this.ctx.currentTime;
+        switch(type) {
+            case 'hit':
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+                gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12); osc.start(now); osc.stop(now + 0.12); break;
+            case 'text':
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(420, now);
+                gain.gain.setValueAtTime(0.02, now); gain.gain.exponentialRampToValueAtTime(0.005, now + 0.03); osc.start(now); osc.stop(now + 0.03); break;
+            case 'heal':
+                osc.type = 'sine'; osc.frequency.setValueAtTime(523, now); osc.frequency.setValueAtTime(659, now + 0.08); osc.frequency.setValueAtTime(783, now + 0.16);
+                gain.gain.setValueAtTime(0.06, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); break;
+            case 'levelUp':
+                osc.type = 'sine'; osc.frequency.setValueAtTime(440, now); osc.frequency.setValueAtTime(554, now + 0.08); osc.frequency.setValueAtTime(659, now + 0.16); osc.frequency.setValueAtTime(880, now + 0.24);
+                gain.gain.setValueAtTime(0.07, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4); osc.start(now); osc.stop(now + 0.4); break;
+        }
+    }
+};
 
 class Monster {
     constructor(speciesName, level = 5) {
         const data = CORE_INDEX[speciesName];
-        this.species = speciesName; this.name = data.name; this.types = data.types; this.level = level; this.moves = [...data.moves];
+        this.species = speciesName; this.name = data.name; this.type = data.type;
+        this.level = level; this.color = data.color; this.moves = [...data.moves]; this.syncRate = data.syncRate;
         this.maxHp = Math.floor((data.baseHp * 2 * level) / 100) + level + 10; this.hp = this.maxHp;
-        this.atk = Math.floor((data.baseAtk * 2 * level) / 100) + 5; this.def = Math.floor((data.baseDef * 2 * level) / 100) + 5; this.spd = Math.floor((data.baseSpd * 2 * level) / 100) + 5;
+        this.atk = Math.floor((data.baseAtk * 2 * level) / 100) + 5; this.def = Math.floor((data.baseDef * 2 * level) / 100) + 5;
+        this.spd = Math.floor((data.baseSpd * 2 * level) / 100) + 5; this.exp = 0; this.expNeeded = Math.pow(this.level, 3);
+        this.isOverclocked = false;
+        this.status = null; // Status condition e.g. "Glitched"
+    }
+    gainExp(amount) {
+        this.exp += amount; let logString = "";
+        while (this.exp >= this.expNeeded) {
+            this.level++; this.expNeeded = Math.pow(this.level, 3);
+            const data = CORE_INDEX[this.species]; const oldMax = this.maxHp;
+            this.maxHp = Math.floor((data.baseHp * 2 * this.level) / 100) + this.level + 10; this.hp += (this.maxHp - oldMax);
+            this.atk = Math.floor((data.baseAtk * 2 * this.level) / 100) + 5; this.def = Math.floor((data.baseDef * 2 * this.level) / 100) + 5;
+            this.spd = Math.floor((data.baseSpd * 2 * this.level) / 100) + 5;
+            logString += `\n${this.name} evolved to Level ${this.level}!`;
+            if (data.learnTable[this.level] !== undefined) {
+                let targetMove = data.learnTable[this.level];
+                if (!this.moves.includes(targetMove)) { this.moves.push(targetMove); logString += `\n[COMPILE SUCCESS]: Learned ${targetMove.toUpperCase()}!`; }
+            }
+        }
+        return logString;
     }
 }
 
-const GameEngine = {
-    gridContainer: document.getElementById("map-grid"),
-    playerEl: document.getElementById("player-node"),
-    combatEl: document.getElementById("combat-interface"),
-    display: document.getElementById("display-window"),
-    controls: document.getElementById("ui-controls"),
-    locTag: document.getElementById("loc-tag"),
-    shardTag: document.getElementById("shard-tag"),
-
-    gameState: "STARTER_SELECT", playerGridX: 2, playerGridY: 2,
-    playerParty: [], activeMon: null, enemyMon: null, shards: 75,
-    inventory: { "Link Card": 5, "Nano-Repair": 3 }, battleSubState: "MAIN",
+const Game = {
+    canvas: document.getElementById("gameCanvas"),
+    ctx: document.getElementById("gameCanvas").getContext("2d"),
+    ui: document.getElementById("ui-overlay"),
+    dialogue: document.getElementById("dialogue-box"),
+    buttonsContainer: document.getElementById("menu-buttons"),
+    
+    gameState: "STARTER_SELECT", 
+    battleSubState: "MAIN_MENU", keys: {}, inputLock: false,
+    currentMapKey: "SECTOR_04", activeMap: null, dialogueQueue: [], currentSpeaker: "", activeInteractingNpc: null,
+    playerParty: [], activePlayerMon: null, enemyMon: null, isBossBattle: false, activeBossSpecies: "",
+    inventory: { "Nano-Repair": 5, "Link Card": 3, "Override Key": 0 }, linkDataFragments: 35, 
+    tileSize: 32, playerGridPos: { x: 4, y: 5 }, pixelPos: { x: 4 * 32, y: 5 * 32 }, moveCooldown: 0, transitionTimer: 0,
+    combatLogFeed: "", particles: [],
 
     init() {
-        this.buildDomGridMap();
-        this.drawStarterSelect();
-        
-        window.addEventListener("keydown", e => {
-            if (this.gameState !== "OVERWORLD") return;
-            let targetX = this.playerGridX; let targetY = this.playerGridY;
-            
-            if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") targetY--;
-            else if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") targetY++;
-            else if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") targetX--;
-            else if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") targetX++;
-            else return;
+        this.initStarterSelectionScreen();
 
-            e.preventDefault();
-            this.executeMoveStep(targetX, targetY);
-        });
-    },
-
-    buildDomGridMap() {
-        this.gridContainer.innerHTML = "";
-        for (let r = 0; r < 8; r++) {
-            for (let c = 0; c < 16; c++) {
-                const tile = document.createElement("div");
-                tile.className = "tile";
-                if (MAP_LAYOUT[r][c] === 2) tile.classList.add("tile-wall");
-                else if (MAP_LAYOUT[r][c] === 1) { tile.classList.add("tile-grass"); tile.innerText = "░"; }
-                else if (MAP_LAYOUT[r][c] === 5) { tile.classList.add("tile-terminal"); tile.innerText = "⎋"; }
-                else tile.classList.add("tile-floor");
-                this.gridContainer.appendChild(tile);
+        window.addEventListener("keydown", e => { 
+            const blockedKeys = ["arrowup", "arrowdown", "arrowleft", "arrowright", " "];
+            if (blockedKeys.includes(e.key.toLowerCase())) {
+                e.preventDefault(); 
             }
-        }
+            if (e.key === " " || e.key === "Enter") { this.processActionTrigger(); return; }
+            this.keys[e.key.toLowerCase()] = true;
+            if (e.key.toLowerCase() === "p" && this.gameState === "OVERWORLD") this.saveProfileToStorage();
+        });
+        window.addEventListener("keyup", e => { 
+            this.keys[e.key.toLowerCase()] = false; 
+        });
+        this.loop();
     },
 
-    updatePlayerTokenPosition() {
-        this.playerEl.style.left = `${this.playerGridX * 32}px`;
-        this.playerEl.style.top = `${this.playerGridY * 32}px`;
+    initStarterSelectionScreen() {
+        this.gameState = "STARTER_SELECT";
+        this.dialogue.innerText = "=== MATRIXQUEST II: REBOOT INITIATED ===\nSelect your next-generation starter core profile:";
+        this.buttonsContainer.innerHTML = "";
+        this.createStarterSelectionOption("SPARKHOUND [VOLT]", "Sparkhound");
+        this.createStarterSelectionOption("NULLSPIDER [AETHER]", "Nullspider");
+        this.createStarterSelectionOption("GLITCHFOX II [CYBER]", "Glitchfox II");
     },
 
-    write(text) { this.display.innerText = text; this.display.scrollTop = this.display.scrollHeight; },
-
-    createButton(label, callback) {
+    createStarterSelectionOption(label, speciesKey) {
         const btn = document.createElement("div"); btn.className = "btn"; btn.innerText = label;
-        btn.onclick = (e) => { e.currentTarget.blur(); callback.call(this); };
-        this.controls.appendChild(btn);
+        btn.onclick = () => {
+            this.playerParty = [new Monster(speciesKey, 5)]; this.activePlayerMon = this.playerParty[0];
+            this.activeMap = MAP_DIRECTORY[this.currentMapKey];
+            
+            this.buttonsContainer.innerHTML = ""; 
+            this.gameState = "OVERWORLD";
+            this.dialogue.innerText = "Mainframe reboot complete. Welcome to the Undergrid.";
+            
+            SoundFX.play('levelUp'); 
+            this.saveProfileToStorage();
+        };
+        this.buttonsContainer.appendChild(btn);
     },
 
-    drawStarterSelect() {
-        this.controls.innerHTML = "";
-        this.write("=== [ENCRYPTED SIGNAL INTERCEPT: YEAR 2026] ===\n'They isolated the spire crash damage by throwing a massive block over Sector 05. The Outback Ledger is an unmapped wasteland of corrupted corporate files. High-level scrubbing scripts have been dispatched to purge everything cleanly. If they lock down the partition, your legacy crew is permanent scrap. Choose a Gen-2 routing core daemon and boot up your deck immediately...'\n\nSelect core architecture setup routine:");
-        this.createButton("NITROFOX.EXE [Plasma/Cyber]", () => this.claimStarter("Nitrofox"));
-        this.createButton("CODEVITRU.SYS [Cyber/Mecha]", () => this.claimStarter("Codevitru"));
-        this.createButton("MECHASPROUT.BAT [Bio/Mecha]", () => this.claimStarter("Mechasprout"));
+    saveProfileToStorage() {
+        const saveState = {
+            mapKey: this.currentMapKey, gridPos: this.playerGridPos, inventory: this.inventory, shards: this.linkDataFragments,
+            party: this.playerParty.map(mon => ({ species: mon.species, level: mon.level, hp: mon.hp, exp: mon.exp, moves: mon.moves }))
+        };
+        localStorage.setItem("matrixquest2_save", JSON.stringify(saveState)); SoundFX.play('heal');
     },
 
-    claimStarter(key) {
-        this.playerParty = [new Monster(key, 5), new Monster("Rootclash", 30), new Monster("Voltsnap", 30), new Monster("Chiptoad", 25)];
-        this.activeMon = this.playerParty[0];
-        this.loadOverworldLayer();
+    processActionTrigger() { 
+        if (this.inputLock) return;
+        if (this.gameState === "OVERWORLD") this.checkNPCInteraction(); 
+        else if (this.gameState === "TEXT_BOX") this.advanceDialogue(); 
     },
 
-    loadOverworldLayer() {
-        this.gameState = "OVERWORLD";
-        this.combatEl.style.display = "none";
-        this.gridContainer.style.display = "grid";
-        this.playerEl.style.display = "flex";
-        this.updatePlayerTokenPosition();
-        this.locTag.innerText = "DECK NODE: SECTOR_05 OUTBACK";
-        this.shardTag.innerText = `FRAGMENTS: ${this.shards}F`;
-        this.controls.innerHTML = "";
-        this.write("⚡ NAVIGATION SOCKET LIVE: Use WASD / Arrow Keys to drive your node frame down the sector pipeline.\n\n[OBJECTIVE]: Navigate the red data flats. Step into pink matrix fields [░] to scan for roaming firewall nodes and bypass corporate encryption layers.");
-        this.createButton("📋 Review Core Configuration Stack", () => this.openPartyMenu());
-        window.focus();
-    },
+    loop() { Game.update(); Game.render(); requestAnimationFrame(Game.loop); },
 
-    executeMoveStep(x, y) {
-        if (y < 0 || y >= 8 || x < 0 || x >= 16) return;
-        if (MAP_LAYOUT[y][x] === 2) return;
-
-        this.playerGridX = x; this.playerGridY = y;
-        this.updatePlayerTokenPosition();
-
-        let tileType = MAP_LAYOUT[y][x];
-        if (tileType === 5) {
-            this.playerParty.forEach(m => m.hp = m.maxHp);
-            this.write("⚡ SANCTUARY HUB INTERACTION: Ancient backup node active. Routed power to local terminal gates. Core voltage metrics and subroutines refreshed to 100% full capacity.");
-        } 
-        else if (tileType === 1) {
-            let rnd = Math.random();
-            if (rnd < 0.2) {
-                this.triggerRandomEncounter();
-            } else if (rnd < 0.4) {
-                let msg = LANDMARK_LOGS[Math.floor(Math.random() * LANDMARK_LOGS.length)];
-                this.write(msg);
+    update() {
+        this.updateParticles();
+        if (this.gameState === "OVERWORLD") { this.handleGridMovement(); } 
+        else if (this.gameState === "TRANSITION") {
+            this.transitionTimer += 4; if (this.transitionTimer >= 100) {
+                this.transitionTimer = 0; if (this.pendingMapWarp) this.executeWarpResolution();
+                else { this.gameState = "BATTLE"; this.battleSubState = "MAIN_MENU"; this.ui.style.display = "grid"; this.initBattleUI(); }
             }
         }
     },
 
-    openPartyMenu() {
-        this.gameState = "MENU";
-        this.controls.innerHTML = "";
-        let log = "=== CYBER-DECK MEMORY DIRECTORY ===\nSelect target file path to route forward into active socket:\n\n";
-        this.playerParty.forEach((m, i) => log += `[Slot ${i+1}] ${m.name} - Lv${m.level} (${m.hp}/${m.maxHp} HP)\n`);
-        this.write(log);
-
-        this.playerParty.forEach((m) => {
-            this.createButton(`${m.name}`, () => {
-                if (m.hp <= 0) { alert("Cannot mount an offline trace structure!"); return; }
-                this.activeMon = m; this.loadOverworldLayer();
+    spawnImpactParticles(x, y, color) {
+        for (let i = 0; i < 12; i++) {
+            this.particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                size: Math.random() * 4 + 2,
+                color: color,
+                life: 20
             });
+        }
+    },
+
+    updateParticles() {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            let p = this.particles[i];
+            p.x += p.vx; p.y += p.vy;
+            p.life--;
+            if (p.life <= 0) this.particles.splice(i, 1);
+        }
+    },
+
+    drawParticles() {
+        this.particles.forEach(p => {
+            this.ctx.fillStyle = p.color;
+            this.ctx.fillRect(p.x, p.y, p.size, p.size);
         });
-        this.createButton("<< RETURN", () => this.loadOverworldLayer());
     },
 
-    triggerRandomEncounter() {
-        this.gameState = "BATTLE"; this.battleSubState = "MAIN";
-        const pool = ["Rustscale", "Shardhawk", "Overhop", "Scraptinger"];
-        this.enemyMon = new Monster(pool[Math.floor(Math.random() * pool.length)], Math.floor(Math.random() * 4) + 6);
-        
-        this.gridContainer.style.display = "none"; this.playerEl.style.display = "none";
-        this.controls.innerHTML = "";
-        this.write(`🚨 CONTACT WARNING: Rogue tracking script [${this.enemyMon.name}] has flagged your signature parameters! Initializing combat interface arrays...`);
-        
-        this.combatEl.style.display = "flex";
-        this.loadBattleUI();
-    },
+    handleGridMovement() {
+        if (!this.activeMap) return;
+        const targetX = this.playerGridPos.x * this.tileSize; const targetY = this.playerGridPos.y * this.tileSize;
+        if (this.pixelPos.x < targetX) this.pixelPos.x += 4; if (this.pixelPos.x > targetX) this.pixelPos.x -= 4;
+        if (this.pixelPos.y < targetY) this.pixelPos.y += 4; if (this.pixelPos.y > targetY) this.pixelPos.y -= 4;
+        if (this.pixelPos.x === targetX && this.pixelPos.y === targetY) {
+            if (this.moveCooldown > 0) { this.moveCooldown--; return; }
+            let nextX = this.playerGridPos.x; let nextY = this.playerGridPos.y;
+            
+            if (this.keys["arrowup"] || this.keys["w"]) nextY--; 
+            else if (this.keys["arrowdown"] || this.keys["s"]) nextY++; 
+            else if (this.keys["arrowleft"] || this.keys["a"]) nextX--; 
+            else if (this.keys["arrowright"] || this.keys["d"]) nextX++;
 
-    syncCombatHuds() {
-        const aData = CORE_INDEX[this.activeMon.species];
-        document.getElementById("ally-name").innerText = this.activeMon.name;
-        document.getElementById("ally-hp-txt").innerText = `${this.activeMon.hp}/${this.activeMon.maxHp}`;
-        document.getElementById("ally-hp-bar").style.width = `${(this.activeMon.hp / this.activeMon.maxHp)*100}%`;
-        document.getElementById("ally-hp-bar").style.backgroundColor = aData.color;
-        document.getElementById("ally-avatar").innerText = aData.symbol;
-
-        const eData = CORE_INDEX[this.enemyMon.species];
-        document.getElementById("enemy-name").innerText = this.enemyMon.name;
-        document.getElementById("enemy-hp-txt").innerText = `${this.enemyMon.hp}/${this.enemyMon.maxHp}`;
-        document.getElementById("enemy-hp-bar").style.width = `${(this.enemyMon.hp / this.enemyMon.maxHp)*100}%`;
-        document.getElementById("enemy-hp-bar").style.backgroundColor = eData.color;
-        document.getElementById("enemy-avatar").innerText = eData.symbol;
-    },
-
-    loadBattleUI() {
-        this.syncCombatHuds();
-        this.controls.innerHTML = "";
-
-        if (this.battleSubState === "MAIN") {
-            this.createButton("⚔️ Run Subroutine", () => { this.battleSubState = "FIGHT"; this.loadBattleUI(); });
-            this.createButton("🎒 Utility Bag", () => { this.battleSubState = "BAG"; this.loadBattleUI(); });
-            this.createButton("🏃 Jack Out (Flee)", () => {
-                this.write("Disconnecting socket traces... Safely bounced back onto overworld matrix.");
-                this.loadOverworldLayer();
-            });
-        } else if (this.battleSubState === "FIGHT") {
-            this.activeMon.moves.forEach(m => {
-                this.createButton(m, () => this.executeActionTurnStack({type: "MOVE", name: m}));
-            });
-            this.createButton("<< BACK", () => { this.battleSubState = "MAIN"; this.loadBattleUI(); });
-        } else if (this.battleSubState === "BAG") {
-            Object.keys(this.inventory).forEach(k => {
-                this.createButton(`${k} (${this.inventory[k]})`, () => {
-                    this.executeActionTurnStack({type: k === "Link Card" ? "CAPTURE" : "ITEM", name: k});
-                }, this.inventory[k] <= 0);
-            });
-            this.createButton("<< BACK", () => { this.battleSubState = "MAIN"; this.loadBattleUI(); });
-        }
-    },
-
-    executeActionTurnStack(act) {
-        this.controls.innerHTML = "";
-        let log = "";
-        const eMoveKey = this.enemyMon.moves[Math.floor(Math.random() * this.enemyMon.moves.length)];
-        
-        let turns = [];
-        if (act.type !== "MOVE" || this.activeMon.spd >= this.enemyMon.spd) {
-            turns = [{p: true, a: act}, {p: false, a: {type: "MOVE", name: eMoveKey}}];
-        } else {
-            turns = [{p: false, a: {type: "MOVE", name: eMoveKey}}, {p: true, a: act}];
-        }
-
-        let ended = false;
-        for (let t of turns) {
-            if (ended) break;
-            if (t.p) {
-                if (this.activeMon.hp <= 0) continue;
-                if (t.a.type === "ITEM") {
-                    this.inventory[t.a.name]--;
-                    this.activeMon.hp = Math.min(this.activeMon.maxHp, this.activeMon.hp + 50);
-                    log += `👉 Parsed Nano-Repair tool patch. Re-compiled +50 Integrity parameters into ${this.activeMon.name}.\n`;
-                    this.syncCombatHuds();
-                } else if (t.a.type === "CAPTURE") {
-                    this.inventory[t.a.name]--; log += `👉 Transmitting Link Card structural capture overlay handshake... `;
-                    let rate = ((this.enemyMon.maxHp - this.enemyMon.hp) * 150) / this.enemyMon.maxHp;
-                    if (Math.random() * 100 < rate) {
-                        let intel = ENEMY_INTEL_LOGS[Math.floor(Math.random() * ENEMY_INTEL_LOGS.length)];
-                        log += `SUCCESS! Hostile signature rewritten cleanly into party arrays!\n\n[EXTRACTED INTERCEPT]: ${intel}\n`;
-                        this.playerParty.push(this.enemyMon); ended = true; this.write(log);
-                        this.loadOverworldLayer(); return;
-                    } else log += `FAILED. Packet handshake rejected.\n`;
-                } else {
-                    let m = MOVES[t.a.name]; let d = this.calculateDamage(this.activeMon, this.enemyMon, m);
-                    this.enemyMon.hp = Math.max(0, this.enemyMon.hp - d);
-                    log += `💥 ${this.activeMon.name} executed [${m.name}]! Caused ${d} integrity loss to firewall.\n`;
-                    this.syncCombatHuds();
+            if (nextX !== this.playerGridPos.x || nextY !== this.playerGridPos.y) {
+                if (nextY >= 0 && nextY < this.activeMap.layout.length && nextX >= 0 && nextX < this.activeMap.layout[0].length) {
+                    let tile = this.activeMap.layout[nextY][nextX]; let npcPresent = this.activeMap.npcs.some(n => n.gridX === nextX && n.gridY === nextY);
                     
-                    if (m.drains) {
-                        let h = Math.floor(d * 0.5); this.activeMon.hp = Math.min(this.activeMon.maxHp, this.activeMon.hp + h);
-                        log += `💚 [SIPHON]: Data Drain routine pulled +${h} health frames back to primary deck socket.\n`;
-                        this.syncCombatHuds();
+                    if (nextY === 0 && this.activeMap.northWarp) {
+                        this.pendingMapWarp = this.activeMap.northWarp; this.gameState = "TRANSITION"; this.transitionTimer = 0; return;
                     }
-                    if (this.enemyMon.hp <= 0) {
-                        let intel = ENEMY_INTEL_LOGS[Math.floor(Math.random() * ENEMY_INTEL_LOGS.length)];
-                        log += `🏆 Hostile process crashed offline. Recovered +25 Fragment Shards.\n\n[EXTRACTED INTERCEPT]: ${intel}\n`;
-                        this.shards += 25; ended = true; this.write(log);
-                        this.loadOverworldLayer(); return;
+                    if (nextY === this.activeMap.layout.length - 1 || (this.currentMapKey === "SECTOR_05" && nextY === 8)) {
+                        if (this.activeMap.southWarp) {
+                            if (this.currentMapKey === "SECTOR_04" && this.inventory["Override Key"] <= 0) {
+                                this.triggerDialogue("SECURITY BARRIER", ["ACCESS DENIED: OVERCLOCK OVERRIDE KEY ABSENT.", "Defeat Kernel Sentinel in Cyber-Waste to secure access."]);
+                                this.moveCooldown = 12; return;
+                            }
+                            this.pendingMapWarp = this.activeMap.southWarp; this.gameState = "TRANSITION"; this.transitionTimer = 0; return;
+                        }
                     }
-                }
-            } else {
-                if (this.enemyMon.hp <= 0) continue;
-                let m = MOVES[t.a.name]; let d = this.calculateDamage(this.enemyMon, this.activeMon, m);
-                this.activeMon.hp = Math.max(0, this.activeMon.hp - d);
-                log += `⚠️ Wild ${this.enemyMon.name} launched [${m.name}]! Delivered ${d} damage parameters down socket.\n`;
-                this.syncCombatHuds();
-                
-                if (this.activeMon.hp <= 0) {
-                    log += `💀 THREAD EXCEPTION: ${this.activeMon.name} trace severed!\n`;
-                    let live = this.playerParty.find(x => x.hp > 0);
-                    if (live) { this.activeMon = live; log += `Hot-swapped backup trace path: [${this.activeMon.name}] mounted.\n`; this.syncCombatHuds(); }
-                    else {
-                        log += `❌ CRITICAL COLLAPSE: All deck traces blanked! Re-routing broken data packets to Sector Base...`;
-                        ended = true; this.write(log); this.playerParty.forEach(x => x.hp = x.maxHp); this.activeMon = this.playerParty[0];
-                        this.loadOverworldLayer(); return;
+
+                    if (tile !== 2 && !npcPresent) {
+                        this.playerGridPos.x = nextX; this.playerGridPos.y = nextY; this.moveCooldown = 2; 
+                        if (tile === 1 && Math.random() < 0.12) this.triggerBattlePipeline(false); 
                     }
                 }
             }
         }
-        this.write(log); this.battleSubState = "MAIN";
-        this.loadBattleUI();
     },
 
-    calculateDamage(att, def, move) {
-        let mod = 1;
-        def.types.forEach(t => { if (TYPE_CHART[move.type] && TYPE_CHART[move.type][t] !== undefined) mod *= TYPE_CHART[move.type][t]; });
-        return Math.floor((((2 * att.level / 5 + 2) * move.power * (att.atk / def.def)) / 50) + 2) * mod;
+    executeWarpResolution() { 
+        const target = this.pendingMapWarp; this.currentMapKey = target.mapKey; this.activeMap = MAP_DIRECTORY[this.currentMapKey]; 
+        this.playerGridPos.x = target.spawnX; this.playerGridPos.y = target.spawnY; 
+        this.pixelPos.x = target.spawnX * this.tileSize; this.pixelPos.y = target.spawnY * this.tileSize; 
+        this.pendingMapWarp = null; this.gameState = "OVERWORLD"; 
+        this.keys = {}; 
+        this.moveCooldown = 20; 
+        this.saveProfileToStorage(); 
+    },
+
+    checkNPCInteraction() { 
+        if (!this.activeMap) return; 
+        if (this.currentMapKey === "SECTOR_04" && this.playerGridPos.y - 1 === 1 && this.playerGridPos.x === 8) { 
+            this.executeSanctuaryHeal(); return; 
+        } 
+        for (let npc of this.activeMap.npcs) { 
+            let dx = Math.abs(this.playerGridPos.x - npc.gridX); 
+            let dy = Math.abs(this.playerGridPos.y - npc.gridY); 
+            if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) { 
+                this.activeInteractingNpc = npc; 
+                this.triggerDialogue(npc.name, npc.lines); return; 
+            } 
+        } 
+    },
+
+    executeSanctuaryHeal() { SoundFX.play('heal'); this.playerParty.forEach(mon => mon.hp = mon.maxHp); this.triggerDialogue("TERMINAL STATION", ["RECOVERY PROTOCOL COMPLETE. All squad cores fully repaired."]); },
+    triggerDialogue(speakerName, textLinesArray) { this.gameState = "TEXT_BOX"; this.currentSpeaker = speakerName; this.dialogueQueue = [...textLinesArray]; this.buttonsContainer.innerHTML = ""; this.advanceDialogue(); },
+    
+    advanceDialogue() {
+        if (this.dialogueQueue.length > 0) { 
+            SoundFX.play('text'); let nextLine = this.dialogueQueue.shift(); this.dialogue.innerText = `[${this.currentSpeaker}]: ${nextLine}`; 
+            this.buttonsContainer.innerHTML = "<div class='btn' style='grid-column: span 2;'>>> PRESS SPACEBAR TO CONTINUE <<</div>"; 
+        } 
+        else {
+            this.inputLock = true; this.gameState = "OVERWORLD"; this.dialogue.innerText = "Mainframe Active. Ready for command logs.";
+            if (this.activeInteractingNpc && this.activeInteractingNpc.isBoss) {
+                let id = this.activeInteractingNpc.id; if(id !== "aegis_prime_boss") this.activeMap.npcs = this.activeMap.npcs.filter(n => n.id !== id);
+                this.activeInteractingNpc = null; this.ui.style.display = "none";
+                let species = (id === "aegis_prime_boss") ? "A.E.G.I.S. Prime" : (id === "weaver_boss") ? "Shadow Weaver" : "Kernel Sentinel"; this.triggerBattlePipeline(true, species);
+                this.inputLock = false;
+            } else if (this.activeInteractingNpc && this.activeInteractingNpc.isShop) { 
+                this.openMerchantStoreMenu(); this.inputLock = false;
+            } else { 
+                this.activeInteractingNpc = null; this.currentSpeaker = ""; setTimeout(() => { Game.inputLock = false; }, 200); 
+            }
+        }
+    },
+
+    openMerchantStoreMenu() {
+        this.gameState = "SHOP_MENU"; this.dialogue.innerText = `[MERCHANT PROTOCOL] Shards: ${this.linkDataFragments}F.`; this.buttonsContainer.innerHTML = "";
+        this.createShopButton("BUY NANO-REPAIR (15F)", 15, "Nano-Repair"); this.createShopButton("BUY LINK CARD (25F)", 25, "Link Card");
+        const closeBtn = document.createElement("div"); closeBtn.className = "btn"; closeBtn.innerText = "EXIT MATRIX SHOP"; closeBtn.onclick = () => { this.activeInteractingNpc = null; this.gameState = "OVERWORLD"; }; this.buttonsContainer.appendChild(closeBtn);
+    },
+
+    createShopButton(label, cost, itemKey) { const btn = document.createElement("div"); btn.className = "btn"; btn.innerText = label; btn.onclick = () => { if (this.linkDataFragments >= cost) { this.linkDataFragments -= cost; this.inventory[itemKey]++; SoundFX.play('heal'); this.openMerchantStoreMenu(); } }; this.buttonsContainer.appendChild(btn); },
+    
+    triggerBattlePipeline(isBoss, bossMonSpecies) { 
+        this.gameState = "TRANSITION"; this.transitionTimer = 0; this.pendingMapWarp = null; this.isBossBattle = isBoss; this.activeBossSpecies = isBoss ? bossMonSpecies : ""; 
+        if (isBoss) { 
+            let level = (bossMonSpecies === "A.E.G.I.S. Prime" ? 28 : (bossMonSpecies === "Shadow Weaver" ? 20 : 12)); 
+            this.enemyMon = new Monster(bossMonSpecies, level); 
+            this.combatLogFeed = `[BOSS INTERCEPT]: ${this.enemyMon.name} hostile link engaged!`; 
+        } else { 
+            const pool = this.activeMap.spawnPool; const spec = pool[Math.floor(Math.random() * pool.length)]; 
+            const finalLvl = Math.floor(Math.random() * (this.activeMap.levelMax - this.activeMap.levelMin + 1)) + this.activeMap.levelMin; 
+            this.enemyMon = new Monster(spec, finalLvl); 
+            this.combatLogFeed = `[GRID ENCOUNTER]: Wild core ${this.enemyMon.name} spotted.`; 
+        } 
+        this.dialogue.innerText = this.combatLogFeed; 
+    },
+
+    drawHumanoidSprite(x, y, color, typeLabel) {
+        const pulse = Math.sin(Date.now() / 180) * 1.5;
+        this.ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+        this.ctx.beginPath();
+        this.ctx.ellipse(x + 16, y + 28, 10, 4, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        this.ctx.fillStyle = "#121424";
+        this.ctx.fillRect(x + 10, y + 22, 4, 6);
+        this.ctx.fillRect(x + 18, y + 22, 4, 6);
+
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + 8, y + 22);
+        this.ctx.lineTo(x + 24, y + 22);
+        this.ctx.lineTo(x + 22, y + 12 + pulse);
+        this.ctx.lineTo(x + 10, y + 12 + pulse);
+        this.ctx.closePath();
+        this.ctx.fill();
+
+        this.ctx.fillStyle = "#d2d4de";
+        this.ctx.beginPath();
+        this.ctx.arc(x + 16, y + 9 + pulse, 5, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        this.ctx.fillStyle = "#00f0ff";
+        if (typeLabel === "BOSS") this.ctx.fillStyle = "#ff0055";
+        if (typeLabel === "MERCHANT") this.ctx.fillStyle = "#ffcc00";
+        this.ctx.fillRect(x + 13, y + 8 + pulse, 6, 2);
+    },
+
+    drawTilemap() {
+        if (!this.activeMap) return;
+        const layout = this.activeMap.layout;
+        this.ctx.fillStyle = this.activeMap.groundColor; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.strokeStyle = "rgba(0, 240, 255, 0.04)";
+        for(let i = 0; i < this.canvas.width; i += 16) { this.ctx.beginPath(); this.ctx.moveTo(i, 0); this.ctx.lineTo(i, this.canvas.height); this.ctx.stroke(); }
+
+        for (let r = 0; r < layout.length; r++) {
+            for (let c = 0; c < layout[r].length; c++) {
+                let type = layout[r][c]; let x = c * this.tileSize; let y = r * this.tileSize;
+                if (type === 1) {
+                    let grad = this.ctx.createLinearGradient(x, y, x + this.tileSize, y + this.tileSize); grad.addColorStop(0, "rgba(0, 240, 255, 0.1)"); grad.addColorStop(1, this.activeMap.grassColor); this.ctx.fillStyle = grad; this.ctx.fillRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
+                    this.ctx.strokeStyle = "rgba(0, 240, 255, 0.25)"; this.ctx.strokeRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
+                } else if (type === 2) {
+                    this.ctx.fillStyle = this.activeMap.wallColor; this.ctx.fillRect(x, y, this.tileSize, this.tileSize); this.ctx.strokeStyle = "#00f0ff"; this.ctx.strokeRect(x + 4, y + 4, this.tileSize - 8, this.tileSize - 8);
+                } else if (type === 3) {
+                    this.ctx.fillStyle = "rgba(255, 51, 51, 0.15)"; this.ctx.fillRect(x, y, this.tileSize, this.tileSize); this.ctx.strokeStyle = "#ff3333"; this.ctx.strokeRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
+                } else if (type === 4) {
+                    this.ctx.fillStyle = "rgba(255, 204, 0, 0.15)"; this.ctx.fillRect(x, y, this.tileSize, this.tileSize); this.ctx.strokeStyle = "#ffcc00"; this.ctx.strokeRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
+                } else if (type === 5) {
+                    this.ctx.fillStyle = "rgba(0, 255, 255, 0.15)"; this.ctx.fillRect(x, y, this.tileSize, this.tileSize); this.ctx.strokeStyle = "#00ffff"; this.ctx.strokeRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4); this.ctx.fillStyle = "#fff"; this.ctx.fillRect(x + 13, y + 6, 6, 20); this.ctx.fillRect(x + 6, y + 13, 20, 6);
+                }
+            }
+        }
+
+        for (let npc of this.activeMap.npcs) { 
+            let npcRole = "CIVILIAN";
+            if (npc.isBoss) npcRole = "BOSS";
+            if (npc.isShop) npcRole = "MERCHANT";
+            this.drawHumanoidSprite(npc.gridX * this.tileSize, npc.gridY * this.tileSize, npc.color, npcRole);
+        }
+
+        this.drawHumanoidSprite(this.pixelPos.x, this.pixelPos.y, "#ffffff", "PLAYER");
+        
+        this.ctx.fillStyle = "rgba(0,0,0,0.85)"; this.ctx.strokeStyle = "#00f0ff"; this.ctx.lineWidth = 2; this.ctx.fillRect(10, 10, 310, 44); this.ctx.strokeRect(10, 10, 310, 44); this.ctx.fillStyle = "#fff"; this.ctx.font = "bold 10px Courier New";
+        this.ctx.fillText(this.activeMap.name.toUpperCase(), 16, 25); this.ctx.fillText(`FRAGMENTS: ${this.linkDataFragments}F | REPAIR KITS: ${this.inventory["Nano-Repair"]}`, 16, 40);
+    },
+
+    drawProceduralMonsterSprite(mon, x, y, size) {
+        const scalePulse = Math.sin(Date.now() / 120) * 3;
+        this.ctx.save();
+        this.ctx.shadowBlur = 20;
+        this.ctx.shadowColor = mon.color;
+
+        this.ctx.fillStyle = "rgba(0,0,0,0.3)";
+        this.ctx.beginPath();
+        this.ctx.ellipse(x + size/2, y + size, size/2, 6, 0, 0, Math.PI*2);
+        this.ctx.fill();
+
+        this.ctx.fillStyle = mon.color;
+        if (mon.type === "Volt") {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + size/2, y);
+            this.ctx.lineTo(x + size, y + size/2);
+            this.ctx.lineTo(x + size/2 + scalePulse, y + size/2);
+            this.ctx.lineTo(x + size/2, y + size);
+            this.ctx.lineTo(x, y + size/2);
+            this.ctx.lineTo(x + size/2 - scalePulse, y + size/2);
+            this.ctx.closePath();
+            this.ctx.fill();
+        } else if (mon.type === "Aether") {
+            this.ctx.beginPath();
+            this.ctx.arc(x + size/2, y + size/2, size/2.5 + scalePulse, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.strokeStyle = "#ffffff";
+            this.ctx.stroke();
+        } else if (mon.type === "Plasma") {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + size/2, y + scalePulse);
+            this.ctx.lineTo(x + size - scalePulse, y + size/2);
+            this.ctx.lineTo(x + size/2, y + size - scalePulse);
+            this.ctx.lineTo(x + scalePulse, y + size/2);
+            this.ctx.closePath();
+            this.ctx.fill();
+        } else { 
+            this.ctx.fillRect(x + scalePulse, y + scalePulse, size - scalePulse*2, size - scalePulse*2);
+        }
+
+        this.ctx.fillStyle = "#ffffff";
+        this.ctx.beginPath();
+        this.ctx.arc(x + size/2, y + size/2, 6, 0, Math.PI*2);
+        this.ctx.fill();
+
+        this.ctx.restore();
+    },
+
+    drawBattleLayout() {
+        let g = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height); g.addColorStop(0, "#05070e"); g.addColorStop(0.6, "#0a0e1a"); g.addColorStop(1, "#030408"); this.ctx.fillStyle = g; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        if (this.enemyMon && this.enemyMon.isOverclocked) { this.ctx.fillStyle = `rgba(255, 0, 85, ${0.08 + Math.sin(Date.now() / 100) * 0.03})`; this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height); }
+        this.ctx.fillStyle = "rgba(0, 240, 255, 0.08)"; this.ctx.beginPath(); this.ctx.ellipse(380, 130, 75, 18, 0, 0, Math.PI * 2); this.ctx.fill(); this.ctx.beginPath(); this.ctx.ellipse(130, 265, 100, 24, 0, 0, Math.PI * 2); this.ctx.fill();
+        
+        if (this.enemyMon && this.enemyMon.hp > 0) { 
+            this.drawProceduralMonsterSprite(this.enemyMon, 345, 60, 65);
+            this.drawUIStatusBlock(this.enemyMon, 30, 35, 200); 
+        }
+        if (this.activePlayerMon && this.activePlayerMon.hp > 0) { 
+            this.drawProceduralMonsterSprite(this.activePlayerMon, 95, 175, 75);
+            this.drawUIStatusBlock(this.activePlayerMon, 270, 195, 210); 
+        }
+
+        this.drawParticles();
+    },
+
+    drawUIStatusBlock(mon, x, y, width) {
+        this.ctx.fillStyle = "#0a0c16"; this.ctx.strokeStyle = mon.isOverclocked ? "#ff0055" : "#00f0ff"; this.ctx.lineWidth = 2; this.ctx.fillRect(x, y, width, 60); this.ctx.strokeRect(x, y, width, 60); this.ctx.fillStyle = "#fff"; this.ctx.font = "bold 11px Courier New"; this.ctx.textAlign = "left";
+        let label = mon.isOverclocked ? `[OVERCLOCK] ${mon.name}` : mon.name; this.ctx.fillText(label.toUpperCase(), x + 10, y + 20); this.ctx.fillText(`Lv${mon.level}`, x + width - 45, y + 20);
+        this.ctx.fillStyle = "#1b1f35"; this.ctx.fillRect(x + 10, y + 28, width - 20, 8); let ratio = Math.max(0, mon.hp / mon.maxHp); this.ctx.fillStyle = ratio > 0.5 ? "#00f0ff" : ratio > 0.2 ? "#ff9e64" : "#f7768e"; this.ctx.fillRect(x + 10, y + 28, (width - 20) * ratio, 8);
+        this.ctx.fillStyle = "#a9b1d6"; this.ctx.font = "10px Courier New"; 
+        let statusTag = mon.status ? ` [${mon.status}]` : "";
+        this.ctx.fillText(`${mon.hp}/${mon.maxHp} HP [${mon.type}]${statusTag}`, x + 10, y + 48);
+    },
+
+    initBattleUI() {
+        this.buttonsContainer.innerHTML = "";
+        if (this.battleSubState === "MAIN_MENU") {
+            this.createMenuButton("EXECUTE ATTACK", () => { this.battleSubState = "FIGHT"; this.initBattleUI(); }); 
+            this.createMenuButton("ITEM MATRIX", () => { this.battleSubState = "BAG"; this.initBattleUI(); }); 
+            this.createMenuButton("PARTY ROSTER", () => { this.battleSubState = "PARTY"; this.initBattleUI(); });
+            if (!this.isBossBattle) this.createMenuButton("ESCAPE LINK", () => this.executeActionTurnStack({ type: 'RUN' })); 
+            else this.createMenuButton("[LOCKED]", () => {});
+        } else if (this.battleSubState === "FIGHT") {
+            this.activePlayerMon.moves.forEach(mKey => { const move = MOVES[mKey]; this.createMenuButton(`${move.name} [${move.type}]`, () => this.executeActionTurnStack({ type: 'MOVE', object: move })); });
+            this.createMenuButton("<< CANCEL", () => { this.battleSubState = "MAIN_MENU"; this.initBattleUI(); });
+        } else if (this.battleSubState === "BAG") {
+            Object.keys(this.inventory).forEach(itemKey => { let count = this.inventory[itemKey]; if (count > 0 && itemKey !== "Override Key") { this.createMenuButton(`${itemKey} (${count})`, () => { if (itemKey === "Link Card") this.executeActionTurnStack({ type: 'CAPTURE', name: itemKey }); else this.executeActionTurnStack({ type: 'ITEM', name: itemKey }); }); } });
+            this.createMenuButton("<< CANCEL", () => { this.battleSubState = "MAIN_MENU"; this.initBattleUI(); });
+        } else if (this.battleSubState === "PARTY") {
+            this.playerParty.forEach((mon, index) => { let statusLabel = mon === this.activePlayerMon ? "[ACTIVE]" : `(${mon.hp}/${mon.maxHp} HP)`; this.createMenuButton(`${mon.name} Lv${mon.level} ${statusLabel}`, () => { if (mon === this.activePlayerMon || mon.hp <= 0) return; this.executeActionTurnStack({ type: 'SWAP', index: index }); }); });
+            this.createMenuButton("<< CANCEL", () => { this.battleSubState = "MAIN_MENU"; this.initBattleUI(); });
+        }
+    },
+
+    createMenuButton(text, callback) { const btn = document.createElement("div"); btn.className = "btn"; btn.innerText = text; btn.onclick = () => { if (!this.inputLock) callback(); }; this.buttonsContainer.appendChild(btn); },
+    
+    executeActionTurnStack(playerAction) { 
+        this.inputLock = true; this.buttonsContainer.innerHTML = ""; 
+        const enemyMoveKey = this.enemyMon.moves[Math.floor(Math.random() * this.enemyMon.moves.length)]; 
+        const enemyAction = { type: 'MOVE', object: MOVES[enemyMoveKey] }; 
+        let queue = []; 
+        if (playerAction.type === 'ITEM' || playerAction.type === 'CAPTURE' || playerAction.type === 'SWAP' || playerAction.type === 'RUN') { 
+            queue = [{ entity: this.activePlayerMon, target: this.enemyMon, action: playerAction }, { entity: this.enemyMon, target: this.activePlayerMon, action: enemyAction }]; 
+        } else { 
+            if (this.activePlayerMon.spd >= this.enemyMon.spd) { 
+                queue = [{ entity: this.activePlayerMon, target: this.enemyMon, action: playerAction }, { entity: this.enemyMon, target: this.activePlayerMon, action: enemyAction }]; 
+            } else { 
+                queue = [{ entity: this.enemyMon, target: this.activePlayerMon, action: enemyAction }, { entity: this.activePlayerMon, target: this.enemyMon, action: playerAction }]; 
+            } 
+        } 
+        this.processQueueStep(queue, 0); 
+    },
+
+    processQueueStep(queue, index) {
+        if (index >= queue.length) { this.evaluateOverclockTriggers(); return; } 
+        const step = queue[index]; 
+        if (step.entity !== this.enemyMon) step.entity = this.activePlayerMon; 
+        if (step.target !== this.enemyMon) step.target = this.activePlayerMon; 
+        if (step.entity.hp <= 0 && step.action.type !== 'SWAP') { this.processQueueStep(queue, index + 1); return; }
+        
+        if (step.action.type === 'RUN') { this.terminateBattleScene(); }
+        else if (step.action.type === 'SWAP') { 
+            this.activePlayerMon = this.playerParty[step.action.index]; 
+            this.combatLogFeed = `Signature swap execution. Appending: ${this.activePlayerMon.name}!`; 
+            this.dialogue.innerText = this.combatLogFeed; 
+            setTimeout(() => this.processQueueStep(queue, index + 1), 1400); 
+        }
+        else if (step.action.type === 'ITEM') { 
+            this.inventory[step.action.name]--; 
+            this.activePlayerMon.hp = Math.min(this.activePlayerMon.maxHp, this.activePlayerMon.hp + 30); 
+            this.combatLogFeed = `Nano-Repair sequence initialized. +30 HP committed to ${this.activePlayerMon.name}.`; 
+            this.dialogue.innerText = this.combatLogFeed; 
+            setTimeout(() => this.processQueueStep(queue, index + 1), 1400); 
+        } 
+        else if (step.action.type === 'CAPTURE') { 
+            this.inventory[step.action.name]--; 
+            if (this.isBossBattle) { 
+                this.combatLogFeed = `COMPILING FAILED: BOSS NODE SECURITY LOCK ACTIVE.`; 
+                this.dialogue.innerText = this.combatLogFeed; 
+                setTimeout(() => this.processQueueStep(queue, index + 1), 1400); return; 
+            } 
+            let caught = Math.random() * 255 < ((3 * this.enemyMon.maxHp - 2 * this.enemyMon.hp) * this.enemyMon.syncRate) / (3 * this.enemyMon.maxHp); 
+            if (caught) { 
+                this.combatLogFeed = `Core parsed cleanly! Linked ${this.enemyMon.name} to active stack.`; 
+                this.dialogue.innerText = this.combatLogFeed; 
+                this.playerParty.push(this.enemyMon); 
+                this.saveProfileToStorage(); 
+                setTimeout(() => this.terminateBattleScene(), 1600); 
+            } else { 
+                this.combatLogFeed = `Link Card failed! Structural boundaries retained.`; 
+                this.dialogue.innerText = this.combatLogFeed; 
+                setTimeout(() => this.processQueueStep(queue, index + 1), 1400); 
+            } 
+        }
+        else if (step.action.type === 'MOVE') { 
+            let move = step.action.object; 
+            SoundFX.play('hit');
+            let targetX = step.target === this.enemyMon ? 380 : 130;
+            let targetY = step.target === this.enemyMon ? 90 : 210;
+            this.spawnImpactParticles(targetX, targetY, step.entity.color);
+
+            if (move.selfBuff) {
+                step.entity.isOverclocked = true;
+                this.combatLogFeed = `${step.entity.name} used ${move.name}!\nAttack parameters boosted by 150%!`;
+            } else {
+                let result = this.evaluateDamageCalculation(step.entity, step.target, move); 
+                if (move.drains) { 
+                    let siphon = Math.floor(result.damage / 2); step.entity.hp = Math.min(step.entity.maxHp, step.entity.hp + siphon); 
+                    this.combatLogFeed = `${step.entity.name} used ${move.name}! ${result.log}\nSiphoned +${siphon} HP.`;
+                } else { 
+                    this.combatLogFeed = `${step.entity.name} used ${move.name}!\n${result.log}`; 
+                }
+            }
+
+            this.dialogue.innerText = this.combatLogFeed;
+            if (step.target.hp <= 0) { setTimeout(() => { if (step.target === this.enemyMon) this.processMatchVictory(); else this.handleActiveFaintRouting(); }, 1400); return; }
+            setTimeout(() => this.processQueueStep(queue, index + 1), 1400); 
+        }
+    },
+
+    evaluateDamageCalculation(attacker, defender, move) { 
+        let modifier = (TYPE_CHART[move.type] && TYPE_CHART[move.type][defender.type] !== undefined) ? TYPE_CHART[move.type][defender.type] : 1; 
+        let baseDmg = Math.floor(((2 * attacker.level / 5 + 2) * move.power * (attacker.atk / defender.def)) / 50) + 2; 
+        let finalDmg = Math.floor(baseDmg * modifier); 
+        if (attacker.isOverclocked) finalDmg = Math.floor(finalDmg * 1.5); 
+        defender.hp = Math.max(0, defender.hp - finalDmg); 
+        
+        if (move.status && !defender.status && Math.random() < 0.4) {
+            defender.status = move.status;
+        }
+
+        let logOut = `Dealt ${finalDmg} structural damage.`;
+        if(modifier > 1) logOut += " [CRITICAL ELEMENTAL MULTIPLIER]";
+        if(modifier < 1 && move.type !== "Primal") logOut += " [TARGET BUFFER INSULATED]";
+        if(defender.status) logOut += ` [STATUS: ${defender.status}]`;
+        return { damage: finalDmg, log: logOut }; 
+    },
+
+    evaluateOverclockTriggers() { 
+        if (this.isBossBattle && this.activeBossSpecies === "A.E.G.I.S. Prime" && !this.enemyMon.isOverclocked) { 
+            let ratio = this.enemyMon.hp / this.enemyMon.maxHp; 
+            if (ratio <= 0.50 && this.enemyMon.hp > 0) { 
+                this.enemyMon.isOverclocked = true; 
+                this.dialogue.innerText = "!!! CRITICAL SYSTEM WARNING !!!\nA.E.G.I.S. PRIME ENGAGING SYSTEM OVERCLOCK! ATTACK SCALED BY 150%!"; 
+                setTimeout(() => { this.inputLock = false; this.initBattleUI(); }, 2200); return; 
+            } 
+        } 
+        this.inputLock = false; 
+        this.dialogue.innerText = "Select next command protocol instruction:"; 
+        this.initBattleUI(); 
+    },
+
+    handleActiveFaintRouting() { let alive = this.playerParty.find(m => m.hp > 0); if (alive) { this.inputLock = false; this.initBattleUI(); } else { this.processMatchFailure(); } },
+
+    processMatchVictory() {
+        if (this.isBossBattle && this.activeBossSpecies === "A.E.G.I.S. Prime") { 
+            this.dialogue.innerText = "A.E.G.I.S. PRIME DEFEATED!\nMainframe environmental structure fully liberated!"; 
+            this.buttonsContainer.innerHTML = ""; 
+            setTimeout(() => { 
+                this.gameState = "GAME_OVER"; 
+                this.dialogue.innerText = "PARADOX RECONCILED PERMANENTLY.\nYou have freed the entire Grid and destroyed A.E.G.I.S. Prime. Victory!"; 
+                localStorage.removeItem("matrixquest2_save"); 
+            }, 3000); 
+        } 
+        else {
+            let shardPayout = Math.floor(this.enemyMon.level * (this.isBossBattle ? 12 : 5)); this.linkDataFragments += shardPayout; 
+            let upgradeMessage = "";
+            if (this.activeBossSpecies === "Kernel Sentinel") { this.inventory["Override Key"] = 1; upgradeMessage = "\n[ITEM ACQUIRED]: Obtained OVERCLOCK OVERRIDE KEY."; }
+            this.dialogue.innerText = `${this.enemyMon.name} offline.\nHarvested +${shardPayout}F Shards.${upgradeMessage}`;
+            setTimeout(() => {
+                let exp = this.enemyMon.level * 18; let evolutionLog = this.activePlayerMon.gainExp(exp);
+                this.saveProfileToStorage();
+                if (evolutionLog !== "") { this.dialogue.innerText = evolutionLog; setTimeout(() => this.terminateBattleScene(), 2500); } else { this.terminateBattleScene(); }
+            }, 1400);
+        }
+    },
+
+    processMatchFailure() { 
+        this.dialogue.innerText = "Stack overflow fatal warning! Returning to Undergrid Sanctuary."; 
+        this.playerParty.forEach(m => m.hp = m.maxHp); 
+        this.activePlayerMon = this.playerParty[0]; 
+        this.playerGridPos = { x: 4, y: 5 }; 
+        this.pixelPos = { x: 4 * 32, y: 5 * 32 }; 
+        this.terminateBattleScene(); 
+    },
+
+    terminateBattleScene() { this.gameState = "OVERWORLD"; this.ui.style.display = "grid"; this.inputLock = false; this.enemyMon = null; this.isBossBattle = false; this.activeBossSpecies = ""; this.render(); },
+
+    drawSelectionBackgroundLayout() {
+        this.ctx.fillStyle = "#020306"; this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.strokeStyle = "rgba(0, 240, 255, 0.08)"; this.ctx.lineWidth = 1;
+        for(let i=0; i<this.canvas.width; i+=16) { this.ctx.beginPath(); this.ctx.moveTo(i,0); this.ctx.lineTo(i,this.canvas.height); this.ctx.stroke(); }
+        this.ctx.fillStyle = "rgba(0, 240, 255, 0.02)"; this.ctx.fillRect(40, 40, this.canvas.width - 80, this.canvas.height - 80);
+    },
+
+    render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); 
+        if (this.gameState === "STARTER_SELECT") {
+            this.drawSelectionBackgroundLayout();
+        } else if (this.gameState === "BATTLE") {
+            this.drawBattleLayout();
+        } else if (this.gameState === "OVERWORLD" || this.gameState === "TEXT_BOX" || this.gameState === "SHOP_MENU" || this.gameState === "TRANSITION") {
+            this.drawTilemap();
+        }
+
+        if (this.gameState === "TRANSITION") { 
+            let color = this.isBossBattle ? "255, 0, 85" : "0, 240, 255"; 
+            this.ctx.fillStyle = `rgba(${color}, ${this.transitionTimer / 100})`; 
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height); 
+        }
     }
 };
 
-document.addEventListener("DOMContentLoaded", () => { setTimeout(() => GameEngine.init(), 100); });
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => { Game.init(); }, 50);
+});
 </script>
 
 </body>
